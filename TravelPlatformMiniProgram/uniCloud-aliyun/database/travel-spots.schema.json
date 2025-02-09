@@ -1,0 +1,137 @@
+{
+	"bsonType": "object",
+	"required": ["name", "categoryId", "imageUrl", "price"],
+	"permission": {
+		"read": true,
+		"create": "auth.uid != null",
+		"update": "auth.uid != null",
+		"delete": "auth.uid != null && doc.creator_id == auth.uid"
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"name": {
+			"bsonType": "string",
+			"description": "景点名称",
+			"title": "名称",
+			"trim": "both"
+		},
+		"categoryId": {
+			"bsonType": "int",
+			"description": "分类ID",
+			"title": "分类",
+			"minimum": 1,
+			"maximum": 4
+		},
+		"imageUrl": {
+			"bsonType": "string",
+			"description": "主图地址",
+			"title": "主图",
+			"pattern": "^(http://|https://|/|./)[^\\s]*"
+		},
+		"images": {
+			"bsonType": "array",
+			"description": "图片列表",
+			"title": "图片",
+			"items": {
+				"bsonType": "string",
+				"pattern": "^(http://|https://|/|./)[^\\s]*"
+			}
+		},
+		"price": {
+			"bsonType": "int",
+			"description": "价格（单位：分）",
+			"title": "价格",
+			"minimum": 0
+		},
+		"rating": {
+			"bsonType": "double",
+			"description": "评分",
+			"title": "评分",
+			"minimum": 0,
+			"maximum": 5,
+			"defaultValue": 5
+		},
+		"commentCount": {
+			"bsonType": "int",
+			"description": "评论数",
+			"title": "评论数",
+			"minimum": 0,
+			"defaultValue": 0
+		},
+		"tags": {
+			"bsonType": "array",
+			"description": "标签列表",
+			"title": "标签",
+			"items": {
+				"bsonType": "string"
+			}
+		},
+		"address": {
+			"bsonType": "string",
+			"description": "地址",
+			"title": "地址",
+			"trim": "both"
+		},
+		"location": {
+			"bsonType": "object",
+			"description": "位置信息",
+			"title": "位置",
+			"properties": {
+				"type": {
+					"bsonType": "string",
+					"description": "位置类型",
+					"defaultValue": "Point",
+					"enum": ["Point"]
+				},
+				"coordinates": {
+					"bsonType": "array",
+					"description": "坐标信息[经度, 纬度]",
+					"items": {
+						"bsonType": "double"
+					}
+				}
+			}
+		},
+		"description": {
+			"bsonType": "string",
+			"description": "景点介绍",
+			"title": "介绍",
+			"trim": "both"
+		},
+		"openTime": {
+			"bsonType": "string",
+			"description": "开放时间",
+			"title": "开放时间",
+			"trim": "both"
+		},
+		"suggestedTime": {
+			"bsonType": "string",
+			"description": "建议游玩时间",
+			"title": "建议时间",
+			"trim": "both"
+		},
+		"creator_id": {
+			"bsonType": "string",
+			"description": "创建者ID",
+			"forceDefaultValue": {
+				"$env": "uid"
+			}
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"update_date": {
+			"bsonType": "timestamp",
+			"description": "更新时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		}
+	}
+} 

@@ -1,0 +1,104 @@
+{
+	"bsonType": "object",
+	"required": ["username", "password"],
+	"permission": {
+		"read": false,
+		"create": false,
+		"update": false,
+		"delete": false
+	},
+	"properties": {
+		"_id": {
+			"description": "存储文档 ID（用户 ID），系统自动生成"
+		},
+		"username": {
+			"bsonType": "string",
+			"title": "用户名",
+			"description": "用户名，不允许重复",
+			"trim": "both"
+		},
+		"password": {
+			"bsonType": "string",
+			"title": "密码",
+			"description": "密码，加密存储",
+			"trim": "both"
+		},
+		"nickname": {
+			"bsonType": "string",
+			"title": "昵称",
+			"description": "用户昵称",
+			"trim": "both"
+		},
+		"gender": {
+			"bsonType": "int",
+			"title": "性别",
+			"description": "用户性别：0 未知 1 男性 2 女性",
+			"defaultValue": 0,
+			"minimum": 0,
+			"maximum": 2
+		},
+		"status": {
+			"bsonType": "int",
+			"title": "用户状态",
+			"description": "用户状态：0 正常 1 禁用 2 审核中 3 审核拒绝",
+			"defaultValue": 0,
+			"minimum": 0,
+			"maximum": 3
+		},
+		"mobile": {
+			"bsonType": "string",
+			"title": "手机号码",
+			"description": "手机号码",
+			"pattern": "^\\+?[0-9-]{3,20}$",
+			"trim": "both"
+		},
+		"mobile_confirmed": {
+			"bsonType": "int",
+			"title": "手机号验证状态",
+			"description": "手机号是否验证，0 为未验证，1 为已验证",
+			"defaultValue": 0
+		},
+		"avatar": {
+			"bsonType": "string",
+			"title": "头像地址",
+			"description": "头像地址",
+			"trim": "both"
+		},
+		"register_date": {
+			"bsonType": "timestamp",
+			"title": "注册时间",
+			"description": "注册时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"last_login_date": {
+			"bsonType": "timestamp",
+			"title": "最后登录时间",
+			"description": "最后登录时间"
+		},
+		"last_login_ip": {
+			"bsonType": "string",
+			"title": "最后登录 IP",
+			"description": "最后登录 IP"
+		},
+		"token": {
+			"bsonType": "array",
+			"title": "登录标识",
+			"description": "登录标识，用于实现同端互斥登录",
+			"items": {
+				"bsonType": "object",
+				"properties": {
+					"token": {
+						"bsonType": "string",
+						"description": "登录标识"
+					},
+					"create_date": {
+						"bsonType": "timestamp",
+						"description": "标识创建时间"
+					}
+				}
+			}
+		}
+	}
+} 
