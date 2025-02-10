@@ -1,8 +1,8 @@
 <template>
 	<view class="container">
 		<!-- 轮播图 -->
-		<swiper class="banner" circular autoplay interval="3000" duration="1000" indicator-dots indicator-active-color="#fff">
-			<swiper-item v-for="(item, index) in spotDetail.images" :key="index">
+		<swiper class="banner" circular autoplay interval="3000" duration="1000" indicator-dots indicator-active-color="#2B9939">
+			<swiper-item v-for="(item, index) in spotDetail.images || []" :key="index">
 				<image :src="item" mode="aspectFill"></image>
 			</swiper-item>
 		</swiper>
@@ -10,22 +10,23 @@
 		<!-- 景点信息 -->
 		<view class="info-section">
 			<view class="title-box">
-				<text class="name">{{spotDetail.name}}</text>
+				<text class="name">{{spotDetail.name || ''}}</text>
 				<view class="favorite" @click="toggleFavorite">
 					<text class="iconfont" :class="spotDetail.isFavorite ? 'icon-heart-fill' : 'icon-heart'"></text>
 				</view>
 			</view>
 			<view class="rating-box">
-				<text class="score">{{spotDetail.rating}}分</text>
-				<text class="comment-count">({{spotDetail.commentCount}}点评)</text>
-				<text class="price">¥{{spotDetail.price}}起</text>
+				<text class="score">{{spotDetail.rating || 0}}分</text>
+				<text class="comment-count">({{spotDetail.commentCount || 0}}点评)</text>
+				<text class="price">¥{{(spotDetail.price || 0) / 100}}起</text>
 			</view>
 			<view class="tag-list">
-				<text class="tag" v-for="(tag, index) in spotDetail.tags" :key="index">{{tag}}</text>
+				<text class="tag" v-for="(tag, index) in spotDetail.tags || []" :key="index">{{tag}}</text>
 			</view>
-			<view class="address-box" @click="openMap">
+			
+			<view class="address-box" @click="showNavigationOptions">
 				<text class="iconfont icon-location"></text>
-				<text class="address">{{spotDetail.address}}</text>
+				<text class="address">{{spotDetail.address || ''}}</text>
 				<text class="distance" v-if="spotDetail.distance">{{spotDetail.distance}}km</text>
 				<text class="iconfont icon-arrow-right"></text>
 			</view>
@@ -34,46 +35,44 @@
 		<!-- 景点介绍 -->
 		<view class="desc-section">
 			<view class="section-title">景点介绍</view>
-			<text class="desc-text">{{spotDetail.description}}</text>
+			<text class="desc-text">{{spotDetail.description || ''}}</text>
 			<view class="open-info">
 				<view class="info-item">
 					<text class="label">开放时间：</text>
-					<text class="value">{{spotDetail.openTime}}</text>
+					<text class="value">{{spotDetail.openTime || ''}}</text>
 				</view>
 				<view class="info-item">
 					<text class="label">建议游玩：</text>
-					<text class="value">{{spotDetail.suggestedTime}}</text>
+					<text class="value">{{spotDetail.suggestedTime || ''}}</text>
 				</view>
 			</view>
 		</view>
 		
-		<!-- 评论区 -->
-		<view class="comment-section">
-			<view class="section-title">
-				<text>游客点评</text>
-				<text class="comment-count">({{spotDetail.commentCount}}条)</text>
+		<!-- 最新点评 -->
+		<view class="comment-section" v-if="spotDetail.comments && spotDetail.comments.length > 0">
+			<view class="section-header">
+				<text class="title">用户评论</text>
+				<text class="more" @click="goToComments">查看全部</text>
 			</view>
 			<view class="comment-list">
-				<view class="comment-item" v-for="(item, index) in comments" :key="index">
-					<view class="user-info">
-						<image class="avatar" :src="item.avatar" mode="aspectFill"></image>
-						<view class="right">
-							<text class="nickname">{{item.nickname}}</text>
-							<view class="rating">
-								<text class="score">{{item.rating}}分</text>
-								<text class="time">{{item.time}}</text>
-							</view>
+				<view class="comment-item" v-for="(item, index) in spotDetail.comments" :key="index">
+					<image class="avatar" :src="item.user.avatar" mode="aspectFill"></image>
+					<view class="content">
+						<view class="user-info">
+							<text class="username">{{item.user.username}}</text>
+							<text class="rating">{{item.rating}}分</text>
 						</view>
-					</view>
-					<text class="content">{{item.content}}</text>
-					<view class="image-list" v-if="item.images && item.images.length">
-						<image 
-							v-for="(img, imgIndex) in item.images" 
-							:key="imgIndex" 
-							:src="img" 
-							mode="aspectFill"
-							@click="previewImage(item.images, imgIndex)"
-						></image>
+						<text class="comment-text">{{item.content}}</text>
+						<view class="image-list" v-if="item.images && item.images.length > 0">
+							<image 
+								v-for="(img, imgIndex) in item.images" 
+								:key="imgIndex" 
+								:src="img" 
+								mode="aspectFill"
+								@click="previewImage(item.images, imgIndex)"
+							></image>
+						</view>
+						<text class="date">{{formatDate(item.create_date)}}</text>
 					</view>
 				</view>
 			</view>
@@ -81,110 +80,399 @@
 		
 		<!-- 底部操作栏 -->
 		<view class="bottom-bar">
-			<button class="share-btn" open-type="share">
-				<text class="iconfont icon-share"></text>
-				<text>分享</text>
-			</button>
-			<button class="primary-btn" @click="goToMap">导航</button>
+			<view class="left">
+				<view class="action-btn" @click="toggleFavorite">
+					<text class="iconfont" :class="spotDetail.isFavorite ? 'icon-heart-fill' : 'icon-heart'"></text>
+					<text>{{spotDetail.isFavorite ? '已收藏' : '收藏'}}</text>
+				</view>
+				<view class="action-btn" @click="openMap">
+					<text class="iconfont icon-navigation"></text>
+					<text>导航</text>
+				</view>
+			</view>
+			<button class="comment-btn" @click="showCommentPopup">我要评论</button>
+		</view>
+		
+		<!-- 导航选项弹窗 -->
+		<view class="popup-mask" v-if="showNavigation" @click="hideNavigationOptions">
+			<view class="popup-content navigation-popup" @click.stop>
+				<view class="navigation-options">
+					<view class="title">选择导航方式</view>
+					<view class="option-list">
+						<view class="option" v-for="(item, index) in navigationOptions" :key="index" @click="navigate(item)">
+							<text class="iconfont" :class="item.icon"></text>
+							<text class="name">{{item.name}}</text>
+						</view>
+					</view>
+					<view class="cancel" @click="hideNavigationOptions">取消</view>
+				</view>
+			</view>
+		</view>
+		
+		<!-- 评论弹出层 -->
+		<view class="popup-mask" v-if="showComment" @click="hideCommentPopup">
+			<view class="popup-content comment-popupouter" @click.stop>
+				<scroll-view scroll-y class="comment-popup">
+					<view class="popup-header">
+						<text class="title">发表评论</text>
+						<text class="close" @click="hideCommentPopup">×</text>
+					</view>
+					
+					<view class="rating-box">
+						<text class="label">评分</text>
+						<view class="slider-container">
+							<slider 
+								class="rating-slider" 
+								:value="rating * 10" 
+								min="0" 
+								max="50" 
+								:step="1"
+								show-value
+								@change="onSliderChange"
+							/>
+							<text class="rating-value">{{rating}}分</text>
+						</view>
+					</view>
+					
+					<view class="content-box">
+						<text class="content-label">评论内容</text>
+						<textarea 
+							v-model="commentContent" 
+							placeholder="请输入您的评论内容，让更多人了解这个景点"
+							maxlength="500"
+							class="content-input"
+						></textarea>
+						<text class="count">{{commentContent.length}}/500</text>
+					</view>
+					
+					<view class="image-box">
+						<text class="image-label">上传图片</text>
+						<view class="image-list">
+							<view 
+								class="image-item" 
+								v-for="(item, index) in commentImages" 
+								:key="index"
+							>
+								<image 
+									:src="item" 
+									mode="aspectFill"
+									@click="previewImage(index)"
+								></image>
+								<text class="delete" @click="deleteImage(index)">×</text>
+							</view>
+							<view 
+								class="upload-btn" 
+								v-if="commentImages.length < 9"
+								@click="chooseImage"
+							>
+								<text class="iconfont icon-camera"></text>
+								<text class="tip">{{commentImages.length}}/9</text>
+							</view>
+						</view>
+					</view>
+					
+					<button 
+						class="submit-btn" 
+						:class="{ active: canSubmitComment }"
+						:disabled="!canSubmitComment"
+						@click="submitComment"
+					>
+						发表评论
+					</button>
+				</scroll-view>
+			</view>
 		</view>
 	</view>
 </template>
 
 <script>
 /**
- * 景点详情页
- * @description 展示景点详细信息，包括图片、介绍、评论等
+ * 景点详情页面
+ * @description 展示景点详细信息，包括图片、介绍、点评等
  */
+import { ref } from 'vue'
+
 export default {
 	data() {
 		return {
-			spotId: null,
-			spotDetail: {
-				name: '西湖风景区',
-				images: [
-					'/static/spots/spot1.jpg',
-					'/static/spots/spot2.jpg',
-					'/static/spots/spot3.jpg'
-				],
-				rating: 4.9,
-				commentCount: 12580,
-				price: 80,
-				tags: ['5A景区', '湖泊', '游船'],
-				address: '浙江省杭州市西湖区龙井路1号',
-				distance: 2.5,
-				description: '西湖，位于浙江省杭州市西湖区龙井路1号，是中国大陆首个世界文化遗产湖泊。湖区面积49平方千米，汇水面积为21.22平方千米，湖面面积为6.38平方千米。',
-				openTime: '全天开放',
-				suggestedTime: '建议3-4小时',
-				isFavorite: false
-			},
-			comments: [
-				{
-					nickname: '游客A',
-					avatar: '/static/avatar/user1.png',
-					rating: 5,
-					time: '2024-02-08',
-					content: '风景非常优美，特别是三潭印月的夜景，太美了！建议傍晚来，可以看到日落。',
-					images: [
-						'/static/comments/comment1.jpg',
-						'/static/comments/comment2.jpg'
-					]
-				},
-				{
-					nickname: '游客B',
-					avatar: '/static/avatar/user2.png',
-					rating: 4.5,
-					time: '2024-02-07',
-					content: '景色宜人，适合散步。建议早上来，人少清净。',
-					images: []
-				}
-			]
+			showNavigation: false,
+			showComment: false,
+			spotId: '',
+			spotDetail: {},
+			navigationOptions: [
+				{ name: '百度地图', icon: 'icon-baidu' },
+				{ name: '高德地图', icon: 'icon-gaode' },
+				{ name: '腾讯地图', icon: 'icon-tengxun' }
+			],
+			rating: 0,
+			commentContent: '',
+			commentImages: []
+		}
+	},
+	computed: {
+		canSubmitComment() {
+			return this.rating > 0 && this.commentContent.trim().length > 0
 		}
 	},
 	onLoad(options) {
 		if (options.id) {
 			this.spotId = options.id
-			// TODO: 根据ID获取景点详情
 			this.getSpotDetail()
 		}
 	},
 	methods: {
 		// 获取景点详情
 		async getSpotDetail() {
-			// TODO: 调用后端接口获取数据
+			try {
+				const res = await uniCloud.callFunction({
+					name: 'get-spot-detail',
+					data: {
+						id: this.spotId
+					}
+				})
+				
+				const uid = uni.getStorageSync('userInfo').id
+				// 获取收藏状态
+				const favoriteRes = await uniCloud.callFunction({
+					name: 'get-favorite-status',
+					data: {
+						uid: uid,
+						spotId: this.spotId
+					}
+
+				})	
+				console.log("favoriteRes",favoriteRes)
+				if (res.result.code === 0) {
+					this.spotDetail = res.result.data
+					this.spotDetail.isFavorite = favoriteRes.result.data.isFavorite
+					console.log("this.spotDetail",this.spotDetail)
+
+				} else {
+					uni.showToast({
+						title: res.result.message,
+						icon: 'none'
+					})
+				}
+
+			} catch (e) {
+				console.error('获取景点详情失败:', e)
+				uni.showToast({
+					title: '获取详情失败',
+					icon: 'none'
+				})
+			}
 		},
 		
 		// 切换收藏状态
-		toggleFavorite() {
-			this.spotDetail.isFavorite = !this.spotDetail.isFavorite
-			uni.showToast({
-				title: this.spotDetail.isFavorite ? '收藏成功' : '已取消收藏',
-				icon: 'none'
-			})
+		async toggleFavorite() {
+			// 检查登录状态
+			const token = uni.getStorageSync('token')
+			if (!token) {
+				uni.navigateTo({
+					url: '/pages/user/login'
+				})
+				return
+			}
+			const uid = uni.getStorageSync('userInfo').id
+			console.log("uid",uid)
+			try {
+				const res = await uniCloud.callFunction({
+					name: 'toggle-favorite',
+					data: {
+						uid: uid,
+						spotId: this.spotId
+					}
+
+				})
+				
+				if (res.result.code === 0) {
+					this.spotDetail.isFavorite = res.result.data.isFavorite
+					uni.showToast({
+						title: this.spotDetail.isFavorite ? '收藏成功' : '已取消收藏',
+						icon: 'success'
+					})
+				} else {
+					uni.showToast({
+						title: res.result.message,
+						icon: 'none'
+					})
+				}
+			} catch (e) {
+				console.error('操作收藏失败:', e)
+				uni.showToast({
+					title: '操作失败',
+					icon: 'none'
+				})
+			}
 		},
 		
-		// 打开地图
-		openMap() {
-			// TODO: 打开地图并显示位置
+		// 显示导航选项
+		showNavigationOptions() {
+			this.showNavigation = true
+		},
+		
+		// 隐藏导航选项
+		hideNavigationOptions() {
+			this.showNavigation = false
+		},
+		
+		// 导航
+		navigate(option) {
+			uni.showToast({
+				title: `即将打开${option.name}`,
+				icon: 'none'
+			})
+			this.hideNavigationOptions()
+		},
+		
+		// 跳转到评论列表页
+		goToComments() {
+			const userId = uni.getStorageSync('userInfo').id
+			console.log("userId",userId)
+			// 判断是否登录
+			if (!userId) {
+				uni.navigateTo({
+					url: '/pages/user/login'
+				})
+				return
+			}	
+			uni.navigateTo({
+				url: `/pages/spots/comments?id=${this.spotId}&userId=${userId}`
+			})
 		},
 		
 		// 预览图片
 		previewImage(images, current) {
 			uni.previewImage({
 				urls: images,
-				current: images[current]
+				current: current
 			})
 		},
 		
-		// 导航
-		goToMap() {
-			// TODO: 调用地图导航
-		}
-	},
-	// 分享
-	onShareAppMessage() {
-		return {
-			title: this.spotDetail.name,
-			path: `/pages/spots/detail?id=${this.spotId}`
+		// 格式化日期
+		formatDate(timestamp) {
+			if (!timestamp) return ''
+			const date = new Date(timestamp)
+			return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+		},
+		
+		// 显示评论弹窗
+		showCommentPopup() {
+			if (!this.checkLogin()) return
+			this.showComment = true
+		},
+		
+		// 隐藏评论弹窗
+		hideCommentPopup() {
+			this.showComment = false
+			// 重置评论数据
+			this.rating = 0
+			this.commentContent = ''
+			this.commentImages = []
+		},
+		
+		// 选择图片
+		async chooseImage() {
+			try {
+				const res = await uni.chooseImage({
+					count: 9 - this.commentImages.length,
+					sizeType: ['compressed'],
+					sourceType: ['album', 'camera']
+				})
+				
+				// 上传图片到云存储
+				uni.showLoading({
+					title: '上传中...'
+				})
+				
+				const uploadTasks = res.tempFilePaths.map(path => {
+					return uniCloud.uploadFile({
+						filePath: path,
+						cloudPath: `comment-images/${Date.now()}-${Math.random().toString(36).slice(-6)}.jpg`
+					})
+				})
+				
+				const uploadResults = await Promise.all(uploadTasks)
+				this.commentImages.push(...uploadResults.map(item => item.fileID))
+				
+				uni.hideLoading()
+			} catch (e) {
+				console.error('选择图片失败:', e)
+				uni.showToast({
+					title: '上传图片失败',
+					icon: 'none'
+				})
+			}
+		},
+		
+		// 删除图片
+		deleteImage(index) {
+			this.commentImages.splice(index, 1)
+		},
+		
+		// 提交评论
+		async submitComment() {
+			if (!this.canSubmitComment) return
+			
+			try {	
+				const uid = uni.getStorageSync('userInfo').id
+				const res = await uniCloud.callFunction({
+					name: 'add-comment',
+					data: {
+						uid: uid,
+						spotId: this.spotId,
+						content: this.commentContent.trim(),
+						rating: this.rating,
+						images: this.commentImages
+					}
+				})
+				
+				if (res.result.code === 0) {
+					uni.showToast({
+						title: '评论成功',
+						icon: 'success'
+					})
+					
+					// 重置表单
+					this.rating = 0
+					this.commentContent = ''
+					this.commentImages = []
+					this.hideCommentPopup()
+					
+					// 刷新评论列表
+					this.getSpotDetail()
+				} else {
+					throw new Error(res.result.message)
+				}
+			} catch (e) {
+				console.error('提交评论失败:', e)
+				uni.showToast({
+					title: e.message || '评论失败',
+					icon: 'none'
+				})
+			}
+		},
+		
+		// 检查登录状态
+		checkLogin() {
+			const token = uni.getStorageSync('token')
+			if (!token) {
+				uni.navigateTo({
+					url: '/pages/user/login'
+				})
+				return false
+			}
+			return true
+		},
+		
+		// 打开地图
+		openMap() {
+			this.showNavigationOptions()
+		},
+		
+		// 处理滑动条变化
+		onSliderChange(e) {
+			this.rating = parseFloat((e.detail.value / 10).toFixed(1))
 		}
 	}
 }
@@ -192,7 +480,9 @@ export default {
 
 <style lang="scss">
 .container {
-	padding-bottom: 100rpx;
+	min-height: 100vh;
+	background-color: #f5f5f5;
+	padding-bottom: 40rpx;
 }
 
 .banner {
@@ -206,8 +496,9 @@ export default {
 }
 
 .info-section {
-	padding: 30rpx;
 	background-color: #fff;
+	padding: 30rpx;
+	margin-bottom: 20rpx;
 	
 	.title-box {
 		display: flex;
@@ -217,17 +508,17 @@ export default {
 		
 		.name {
 			font-size: 36rpx;
-			font-weight: bold;
 			color: #333;
+			font-weight: bold;
 		}
 		
 		.favorite {
 			.iconfont {
-				font-size: 40rpx;
+				font-size: 48rpx;
 				color: #999;
 				
 				&.icon-heart-fill {
-					color: #FF5B05;
+					color: #ff5b05;
 				}
 			}
 		}
@@ -238,9 +529,9 @@ export default {
 		
 		.score {
 			font-size: 32rpx;
-			color: #FF9500;
+			color: #ff9500;
 			font-weight: bold;
-			margin-right: 8rpx;
+			margin-right: 10rpx;
 		}
 		
 		.comment-count {
@@ -251,22 +542,24 @@ export default {
 		
 		.price {
 			font-size: 32rpx;
-			color: #FF5B05;
+			color: #ff5b05;
 			font-weight: bold;
 		}
 	}
 	
 	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
 		margin-bottom: 20rpx;
 		
 		.tag {
-			display: inline-block;
-			padding: 4rpx 12rpx;
-			margin-right: 12rpx;
-			font-size: 22rpx;
-			color: #2B9939;
-			background-color: rgba(43, 153, 57, 0.1);
+			padding: 4rpx 16rpx;
+			background-color: #f5f5f5;
+			color: #666;
+			font-size: 24rpx;
 			border-radius: 4rpx;
+			margin-right: 16rpx;
+			margin-bottom: 16rpx;
 		}
 	}
 	
@@ -275,15 +568,15 @@ export default {
 		align-items: center;
 		
 		.icon-location {
-			font-size: 32rpx;
-			color: #666;
+			font-size: 36rpx;
+			color: #2b9939;
 			margin-right: 10rpx;
 		}
 		
 		.address {
 			flex: 1;
 			font-size: 28rpx;
-			color: #666;
+			color: #333;
 		}
 		
 		.distance {
@@ -300,14 +593,14 @@ export default {
 }
 
 .desc-section {
-	margin-top: 20rpx;
-	padding: 30rpx;
 	background-color: #fff;
+	padding: 30rpx;
+	margin-bottom: 20rpx;
 	
 	.section-title {
 		font-size: 32rpx;
-		font-weight: bold;
 		color: #333;
+		font-weight: bold;
 		margin-bottom: 20rpx;
 	}
 	
@@ -315,19 +608,26 @@ export default {
 		font-size: 28rpx;
 		color: #666;
 		line-height: 1.6;
-		margin-bottom: 20rpx;
+		margin-bottom: 30rpx;
 	}
 	
 	.open-info {
 		.info-item {
-			margin-bottom: 10rpx;
+			display: flex;
+			margin-bottom: 16rpx;
+			
+			&:last-child {
+				margin-bottom: 0;
+			}
 			
 			.label {
 				font-size: 28rpx;
 				color: #333;
+				width: 160rpx;
 			}
 			
 			.value {
+				flex: 1;
 				font-size: 28rpx;
 				color: #666;
 			}
@@ -336,31 +636,31 @@ export default {
 }
 
 .comment-section {
-	margin-top: 20rpx;
-	padding: 30rpx;
 	background-color: #fff;
+	padding: 30rpx;
+	margin-bottom: 20rpx;
 	
-	.section-title {
+	.section-header {
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 20rpx;
+		margin-bottom: 30rpx;
 		
-		text {
+		.title {
 			font-size: 32rpx;
-			font-weight: bold;
 			color: #333;
+			font-weight: bold;
 		}
 		
-		.comment-count {
-			font-size: 24rpx;
-			color: #999;
-			margin-left: 10rpx;
-			font-weight: normal;
+		.more {
+			font-size: 28rpx;
+			color: #2b9939;
 		}
 	}
 	
 	.comment-list {
 		.comment-item {
+			display: flex;
 			padding: 20rpx 0;
 			border-bottom: 1rpx solid #eee;
 			
@@ -368,63 +668,61 @@ export default {
 				border-bottom: none;
 			}
 			
-			.user-info {
-				display: flex;
-				align-items: center;
-				margin-bottom: 16rpx;
-				
-				.avatar {
-					width: 64rpx;
-					height: 64rpx;
-					border-radius: 32rpx;
-					margin-right: 16rpx;
-				}
-				
-				.right {
-					flex: 1;
-					
-					.nickname {
-						font-size: 28rpx;
-						color: #333;
-						margin-bottom: 4rpx;
-					}
-					
-					.rating {
-						.score {
-							font-size: 24rpx;
-							color: #FF9500;
-							margin-right: 10rpx;
-						}
-						
-						.time {
-							font-size: 24rpx;
-							color: #999;
-						}
-					}
-				}
+			.avatar {
+				width: 80rpx;
+				height: 80rpx;
+				border-radius: 40rpx;
+				margin-right: 20rpx;
 			}
 			
 			.content {
-				font-size: 28rpx;
-				color: #333;
-				line-height: 1.6;
-				margin-bottom: 16rpx;
-			}
-			
-			.image-list {
-				display: flex;
-				flex-wrap: wrap;
+				flex: 1;
 				
-				image {
-					width: 200rpx;
-					height: 200rpx;
-					margin-right: 10rpx;
+				.user-info {
+					display: flex;
+					justify-content: space-between;
 					margin-bottom: 10rpx;
-					border-radius: 8rpx;
 					
-					&:nth-child(3n) {
-						margin-right: 0;
+					.username {
+						font-size: 28rpx;
+						color: #333;
+						font-weight: bold;
 					}
+					
+					.rating {
+						font-size: 28rpx;
+						color: #ff9500;
+					}
+				}
+				
+				.comment-text {
+					font-size: 28rpx;
+					color: #666;
+					line-height: 1.6;
+					margin-bottom: 16rpx;
+				}
+				
+				.image-list {
+					display: flex;
+					flex-wrap: wrap;
+					margin-bottom: 16rpx;
+					
+					image {
+						width: 160rpx;
+						height: 160rpx;
+						margin-right: 10rpx;
+						margin-bottom: 10rpx;
+						border-radius: 8rpx;
+						
+						&:nth-child(3n) {
+							margin-right: 0;
+						}
+					}
+				}
+				
+				.date {
+					font-size: 24rpx;
+					color: #999;
 				}
 			}
 		}
@@ -443,33 +741,33 @@ export default {
 	align-items: center;
 	padding: 0 30rpx;
 	
-	.share-btn {
+	.left {
 		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		margin-right: 30rpx;
-		background: none;
-		padding: 0;
-		line-height: 1;
 		
-		&::after {
-			border: none;
-		}
-		
-		.iconfont {
-			font-size: 40rpx;
-			color: #666;
-			margin-bottom: 4rpx;
-		}
-		
-		text {
-			font-size: 24rpx;
-			color: #666;
+		.action-btn {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin-right: 40rpx;
+			
+			.iconfont {
+				font-size: 40rpx;
+				color: #666;
+				margin-bottom: 4rpx;
+				
+				&.icon-heart-fill {
+					color: #ff5b05;
+				}
+			}
+			
+			text {
+				font-size: 24rpx;
+				color: #666;
+			}
 		}
 	}
 	
-	.primary-btn {
+	.comment-btn {
 		flex: 1;
 		height: 72rpx;
 		line-height: 72rpx;
@@ -478,6 +776,253 @@ export default {
 		color: #fff;
 		font-size: 28rpx;
 		border-radius: 36rpx;
+		margin-left: 30rpx;
+		
+		&::after {
+			border: none;
+		}
+	}
+}
+
+/* 弹窗基础样式 */
+.popup-mask {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: rgba(0, 0, 0, 0.6);
+	z-index: 999;
+	display: flex;
+	align-items: flex-end;
+}
+
+.popup-content {
+	width: 100%;
+	background-color: #fff;
+	border-radius: 24rpx 24rpx 0 0;
+	position: relative;
+	transition: transform 0.3s;
+	max-height: 90vh;
+}
+
+.comment-popupouter {	
+	transform: translateY(0);
+}
+
+.navigation-popup {
+	transform: translateY(0);
+	padding: 30rpx;
+	
+	.navigation-options {
+		.title {
+			font-size: 32rpx;
+			color: #333;
+			text-align: center;
+			margin-bottom: 30rpx;
+		}
+		
+		.option-list {
+			display: flex;
+			justify-content: space-around;
+			margin-bottom: 30rpx;
+			
+			.option {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				
+				.iconfont {
+					font-size: 80rpx;
+					color: #2B9939;
+					margin-bottom: 10rpx;
+				}
+				
+				.name {
+					font-size: 28rpx;
+					color: #333;
+				}
+			}
+		}
+		
+		.cancel {
+			height: 90rpx;
+			line-height: 90rpx;
+			text-align: center;
+			font-size: 32rpx;
+			color: #666;
+			border-top: 1rpx solid #eee;
+		}
+	}
+}
+
+.comment-popup {
+	height: 90vh;
+	padding: 30rpx;
+	box-sizing: border-box;
+	
+	.popup-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30rpx;
+		
+		.title {
+			font-size: 32rpx;
+			color: #333;
+			font-weight: bold;
+		}
+		
+		.close {
+			font-size: 48rpx;
+			color: #999;
+			padding: 0 20rpx;
+		}
+	}
+	
+	.rating-box {
+		margin-bottom: 30rpx;
+		
+		.label {
+			font-size: 28rpx;
+			color: #333;
+			margin-bottom: 20rpx;
+			display: block;
+		}
+		
+		.slider-container {
+			display: flex;
+			align-items: center;
+			padding: 0 20rpx;
+			
+			.rating-slider {
+				flex: 1;
+				margin-right: 20rpx;
+			}
+			
+			.rating-value {
+				font-size: 32rpx;
+				color: #FF9500;
+				font-weight: bold;
+				min-width: 80rpx;
+			}
+		}
+	}
+	
+	.content-box {
+		margin-bottom: 30rpx;
+		
+		.content-label {
+			font-size: 28rpx;
+			color: #333;
+			margin-bottom: 20rpx;
+			display: block;
+		}
+		
+		.content-input {
+			width: 100%;
+			height: 200rpx;
+			padding: 20rpx;
+			background-color: #f5f5f5;
+			border-radius: 12rpx;
+			font-size: 28rpx;
+			color: #333;
+			box-sizing: border-box;
+		}
+		
+		.count {
+			font-size: 24rpx;
+			color: #999;
+			text-align: right;
+			margin-top: 10rpx;
+			display: block;
+		}
+	}
+	
+	.image-box {
+		margin-bottom: 30rpx;
+		
+		.image-label {
+			font-size: 28rpx;
+			color: #333;
+			margin-bottom: 20rpx;
+			display: block;
+		}
+		
+		.image-list {
+			display: flex;
+			flex-wrap: wrap;
+			
+			.image-item {
+				width: 160rpx;
+				height: 160rpx;
+				margin-right: 20rpx;
+				margin-bottom: 20rpx;
+				position: relative;
+				
+				&:nth-child(4n) {
+					margin-right: 0;
+				}
+				
+				image {
+					width: 100%;
+					height: 100%;
+					border-radius: 8rpx;
+				}
+				
+				.delete {
+					position: absolute;
+					top: -16rpx;
+					right: -16rpx;
+					width: 40rpx;
+					height: 40rpx;
+					line-height: 36rpx;
+					text-align: center;
+					background-color: rgba(0,0,0,0.5);
+					border-radius: 20rpx;
+					color: #fff;
+					font-size: 32rpx;
+				}
+			}
+			
+			.upload-btn {
+				width: 160rpx;
+				height: 160rpx;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				background-color: #f5f5f5;
+				border-radius: 8rpx;
+				
+				.iconfont {
+					font-size: 48rpx;
+					color: #999;
+					margin-bottom: 10rpx;
+				}
+				
+				.tip {
+					font-size: 24rpx;
+					color: #999;
+				}
+			}
+		}
+	}
+	
+	.submit-btn {
+		width: 100%;
+		height: 88rpx;
+		line-height: 88rpx;
+		text-align: center;
+		background-color: #ccc;
+		color: #fff;
+		font-size: 32rpx;
+		border-radius: 44rpx;
+		margin-top: 40rpx;
+		
+		&.active {
+			background-color: #2B9939;
+		}
 		
 		&::after {
 			border: none;

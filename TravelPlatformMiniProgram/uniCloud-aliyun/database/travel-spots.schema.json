@@ -27,16 +27,16 @@
 		"imageUrl": {
 			"bsonType": "string",
 			"description": "主图地址",
-			"title": "主图",
-			"pattern": "^(http://|https://|/|./)[^\\s]*"
+			"title": "主图"
+			//"pattern": "^(http://|https://|/|./)[^\\s]*"
 		},
 		"images": {
 			"bsonType": "array",
 			"description": "图片列表",
 			"title": "图片",
 			"items": {
-				"bsonType": "string",
-				"pattern": "^(http://|https://|/|./)[^\\s]*"
+				"bsonType": "string"
+				//"pattern": "^(http://|https://|/|./)[^\\s]*"
 			}
 		},
 		"price": {

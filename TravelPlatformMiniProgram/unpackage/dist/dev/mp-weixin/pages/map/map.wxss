@@ -367,6 +367,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .search-box {
   padding: 20rpx 30rpx;
@@ -394,6 +395,54 @@
 .map {
   width: 100%;
   height: 50vh;
+}
+.navigation-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 24rpx 24rpx 0 0;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navigation-info .spot-info {
+  flex: 1;
+  margin-right: 20rpx;
+}
+.navigation-info .spot-info .name {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.navigation-info .spot-info .address {
+  font-size: 24rpx;
+  color: #666;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.navigation-info .navigation-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+.navigation-info .navigation-btn .iconfont {
+  font-size: 48rpx;
+  color: #007AFF;
+  margin-bottom: 10rpx;
+}
+.navigation-info .navigation-btn text {
+  font-size: 24rpx;
+  color: #007AFF;
 }
 .spot-list {
   flex: 1;
@@ -479,4 +528,62 @@
 .loading text, .no-more text {
   font-size: 24rpx;
   color: #999;
+}
+
+/* 弹窗基础样式 */
+.popup-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+}
+.popup-content {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  position: relative;
+  transition: transform 0.3s;
+  max-height: 90vh;
+}
+.navigation-popup {
+  transform: translateY(0);
+  padding: 30rpx;
+}
+.navigation-popup .navigation-options .title {
+  font-size: 32rpx;
+  color: #333;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+.navigation-popup .navigation-options .option-list {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30rpx;
+}
+.navigation-popup .navigation-options .option-list .option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.navigation-popup .navigation-options .option-list .option .iconfont {
+  font-size: 80rpx;
+  color: #2B9939;
+  margin-bottom: 10rpx;
+}
+.navigation-popup .navigation-options .option-list .option .name {
+  font-size: 28rpx;
+  color: #333;
+}
+.navigation-popup .navigation-options .cancel {
+  height: 90rpx;
+  line-height: 90rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #666;
+  border-top: 1rpx solid #eee;
 }

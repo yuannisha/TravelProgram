@@ -3,16 +3,19 @@
 		<!-- 搜索框 -->
 		<view class="search-box">
 			<view class="input-box">
-				<text class="iconfont icon-search"></text>
 				<input 
 					type="text"
 					v-model="keyword"
 					placeholder="搜索景点/地点"
-					confirm-type="search"
 					@confirm="search"
 					focus
 				/>
-				<text class="iconfont icon-close" v-if="keyword" @click="clearKeyword"></text>
+				<view class="icon-search-box" @click="search">
+					<image src="/static/icons/search.png" mode="aspectFit" class="icon-img"></image>
+				</view>
+				<view class="icon-close-box" v-if="keyword" @click="clearKeyword">
+					<image src="/static/icons/clear.png" mode="aspectFit" class="icon-img"></image>
+				</view>
 			</view>
 			<text class="cancel-btn" @click="goBack">取消</text>
 		</view>
@@ -30,9 +33,13 @@
 					:key="index"
 					@click="useHistory(item)"
 				>
-					<text class="iconfont icon-time"></text>
+					<view class="icon-time-box">
+						<image src="/static/icons/time.png" mode="aspectFit" class="icon-img" style="width: 40rpx;height: 40rpx;"></image>
+					</view>
 					<text class="keyword">{{item}}</text>
-					<text class="iconfont icon-close" @click.stop="removeHistory(index)"></text>
+					<view class="icon-close-box" @click.stop="removeHistory(index)">
+						<image src="/static/icons/clear.png" mode="aspectFit" class="icon-img" style="width: 40rpx;height: 40rpx;"></image>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -57,24 +64,46 @@
 		
 		<!-- 搜索结果 -->
 		<scroll-view 
-			v-else
+			v-if="keyword"
 			class="result-list" 
 			scroll-y 
 			@scrolltolower="loadMore"
 		>
-			<view class="spot-item" v-for="(item, index) in spotList" :key="index" @click="goToDetail(item._id)">
-				<image class="spot-image" :src="item.imageUrl" mode="aspectFill"></image>
-				<view class="info">
-					<view class="name-box">
-						<text class="name">{{item.name}}</text>
-						<text class="distance" v-if="item.distance">{{item.distance.toFixed(1)}}km</text>
+			<!-- 无搜索结果时显示推荐 -->
+			<view v-if="spotList.length === 0 && !loading" class="no-result">
+				<text class="tip">暂未搜索到相关内容，以下是推荐景点</text>
+				<view class="recommend-list">
+					<view class="spot-item" v-for="(item, index) in recommendList" :key="index" @click="goToDetail(item._id)">
+						<image class="spot-image" :src="item.imageUrl" mode="aspectFill"></image>
+						<view class="info">
+							<view class="name-box">
+								<text class="name">{{item.name}}</text>
+								<text class="distance" v-if="item.distance">{{item.distance.toFixed(1)}}km</text>
+							</view>
+							<view class="rating">
+								<text class="score">{{item.rating}}分</text>
+								<text class="price">¥{{item.price/100}}起</text>
+							</view>
+							<view class="address">{{item.address}}</view>
+						</view>
 					</view>
-					<view class="rating">
-						<text class="score">{{item.rating}}分</text>
-						<text class="price">¥{{item.price}}起</text>
-					</view>
-					<view class="tag-list">
-						<text class="tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">{{tag}}</text>
+				</view>
+			</view>
+			
+			<!-- 搜索结果列表 -->
+			<view v-else>
+				<view class="spot-item" v-for="(item, index) in spotList" :key="index" @click="goToDetail(item._id)">
+					<image class="spot-image" :src="item.imageUrl" mode="aspectFill"></image>
+					<view class="info">
+						<view class="name-box">
+							<text class="name">{{item.name}}</text>
+							<text class="distance" v-if="item.distance">{{item.distance.toFixed(1)}}km</text>
+						</view>
+						<view class="rating">
+							<text class="score">{{item.rating}}分</text>
+							<text class="price">¥{{item.price/100}}起</text>
+						</view>
+						<view class="address">{{item.address}}</view>
 					</view>
 				</view>
 			</view>
@@ -85,12 +114,6 @@
 			</view>
 			<view class="no-more" v-if="noMore">
 				<text>没有更多了</text>
-			</view>
-			
-			<!-- 空状态 -->
-			<view class="empty" v-if="!loading && spotList.length === 0">
-				<image src="/static/empty/no-search.png" mode="aspectFit"></image>
-				<text>未找到相关景点</text>
 			</view>
 		</scroll-view>
 	</view>
@@ -119,10 +142,13 @@ export default {
 				'丽江'
 			], // 热门搜索
 			spotList: [], // 搜索结果
+			recommendList: [], // 推荐景点列表
 			page: 1,
 			pageSize: 10,
 			loading: false,
-			noMore: false
+			noMore: false,
+			longitude: null,
+			latitude: null
 		}
 	},
 	onLoad() {
@@ -130,6 +156,8 @@ export default {
 		this.getSearchHistory()
 		// 获取当前位置
 		this.getCurrentLocation()
+		// 获取推荐景点
+		this.getRecommendSpots()
 	},
 	methods: {
 		// 获取搜索历史
@@ -211,31 +239,47 @@ export default {
 		
 		// 搜索
 		async search() {
+			console.log("搜索关键词", this.keyword)
 			if (!this.keyword) return
 			
 			this.page = 1
 			this.spotList = []
 			this.noMore = false
-			this.saveSearchHistory()
-			await this.getSearchResult()
+			this.loading = true  // 在这里设置loading状态
+
+			try {
+				console.log("搜索开始")
+				await this.getSearchResult()
+				this.saveSearchHistory()
+			} catch (e) {
+				console.error('搜索失败:', e)
+				uni.showToast({
+					title: '搜索失败，请重试',
+					icon: 'none'
+				})
+			} finally {
+				this.loading = false
+			}
 		},
 		
 		// 获取搜索结果
 		async getSearchResult() {
-			if (this.loading || this.noMore) return
-			this.loading = true
+			console.log("获取搜索结果")
+			console.log("loading", this.loading)
 			
 			try {
 				const res = await uniCloud.callFunction({
 					name: 'get-spots',
 					data: {
 						keyword: this.keyword,
-						longitude: this.longitude,
-						latitude: this.latitude,
 						page: this.page,
-						pageSize: this.pageSize
+						pageSize: this.pageSize,
+						longitude: this.longitude,
+						latitude: this.latitude
 					}
 				})
+				
+				console.log("搜索结果：", res)
 				
 				if (res.result.code === 0) {
 					const { list, total } = res.result.data
@@ -247,15 +291,21 @@ export default {
 					}
 					
 					this.noMore = this.spotList.length >= total
+					
+					// 如果搜索结果为空，显示提示
+					if (this.page === 1 && list.length === 0) {
+						uni.showToast({
+							title: '未找到相关景点',
+							icon: 'none'
+						})
+					}
+				} else {
+					throw new Error(res.result.message)
 				}
 			} catch (e) {
-				uni.showToast({
-					title: '搜索失败',
-					icon: 'none'
-				})
+				console.error('获取搜索结果失败:', e)
+				throw e
 			}
-			
-			this.loading = false
 		},
 		
 		// 加载更多
@@ -276,6 +326,27 @@ export default {
 		// 返回上一页
 		goBack() {
 			uni.navigateBack()
+		},
+		
+		// 获取推荐景点
+		async getRecommendSpots() {
+			try {
+				const res = await uniCloud.callFunction({
+					name: 'get-spots',
+					data: {
+						page: 1,
+						pageSize: 5,
+						sortBy: 'rating',
+						sortOrder: 'desc'
+					}
+				})
+				
+				if (res.result.code === 0) {
+					this.recommendList = res.result.data.list
+				}
+			} catch (e) {
+				console.error('获取推荐景点失败:', e)
+			}
 		}
 	}
 }
@@ -284,7 +355,7 @@ export default {
 <style lang="scss">
 .container {
 	min-height: 100vh;
-	background-color: #fff;
+	background-color: #f5f5f5;
 }
 
 .search-box {
@@ -292,22 +363,36 @@ export default {
 	align-items: center;
 	padding: 20rpx 30rpx;
 	background-color: #fff;
-	border-bottom: 1rpx solid #eee;
 	
 	.input-box {
 		flex: 1;
 		display: flex;
 		align-items: center;
 		height: 72rpx;
-		padding: 0 20rpx;
 		background-color: #f5f5f5;
 		border-radius: 36rpx;
+		padding: 0 30rpx;
 		margin-right: 20rpx;
 		
-		.icon-search {
-			font-size: 32rpx;
-			color: #666;
+		.icon-search-box, .icon-close-box, .icon-time-box {
+			width: 40rpx;
+			height: 40rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			
+			.icon-img {
+				width: 32rpx;
+				height: 32rpx;
+			}
+		}
+		
+		.icon-search-box {
 			margin-right: 10rpx;
+		}
+		
+		.icon-close-box {
+			margin-left: 10rpx;
 		}
 		
 		input {
@@ -315,12 +400,6 @@ export default {
 			height: 100%;
 			font-size: 28rpx;
 			color: #333;
-		}
-		
-		.icon-close {
-			font-size: 32rpx;
-			color: #999;
-			padding: 10rpx;
 		}
 	}
 	
@@ -330,7 +409,53 @@ export default {
 	}
 }
 
-.history-section, .hot-section {
+.history-section {
+	background-color: #fff;
+	padding: 30rpx;
+	margin-top: 20rpx;
+	
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30rpx;
+		
+		.title {
+			font-size: 28rpx;
+			color: #333;
+			font-weight: bold;
+		}
+		
+		.clear-btn {
+			font-size: 24rpx;
+			color: #999;
+		}
+	}
+	
+	.history-list {
+		.history-item {
+			display: flex;
+			align-items: center;
+			margin-bottom: 20rpx;
+			
+			.icon-time-box {
+				margin-right: 10rpx;
+			}
+			
+			.icon-close-box {
+				padding: 10rpx;
+			}
+			
+			.keyword {
+				flex: 1;
+				font-size: 28rpx;
+				color: #333;
+			}
+		}
+	}
+}
+
+.hot-section {
 	padding: 30rpx;
 	
 	.section-header {
@@ -344,79 +469,50 @@ export default {
 			color: #333;
 			font-weight: bold;
 		}
-		
-		.clear-btn {
-			font-size: 28rpx;
-			color: #999;
-		}
 	}
-}
-
-.history-list {
-	.history-item {
-		display: flex;
-		align-items: center;
-		height: 80rpx;
-		
-		.icon-time {
-			font-size: 32rpx;
-			color: #999;
-			margin-right: 10rpx;
-		}
-		
-		.keyword {
-			flex: 1;
-			font-size: 28rpx;
-			color: #333;
-		}
-		
-		.icon-close {
-			font-size: 32rpx;
-			color: #999;
-			padding: 10rpx;
-		}
-	}
-}
-
-.hot-list {
-	.hot-item {
-		display: flex;
-		align-items: center;
-		height: 80rpx;
-		
-		.rank {
-			width: 40rpx;
-			font-size: 28rpx;
-			color: #999;
-			text-align: center;
+	
+	.hot-list {
+		.hot-item {
+			display: flex;
+			align-items: center;
+			height: 80rpx;
 			
-			&.top {
-				color: #FF5B05;
-				font-weight: bold;
+			.rank {
+				width: 40rpx;
+				font-size: 28rpx;
+				color: #999;
+				text-align: center;
+				
+				&.top {
+					color: #FF5B05;
+					font-weight: bold;
+				}
 			}
-		}
-		
-		.keyword {
-			font-size: 28rpx;
-			color: #333;
+			
+			.keyword {
+				font-size: 28rpx;
+				color: #333;
+			}
 		}
 	}
 }
 
 .result-list {
+	background-color: #fff;
 	padding: 20rpx;
 	
 	.spot-item {
 		display: flex;
 		padding: 20rpx;
-		background-color: #fff;
-		border-radius: 12rpx;
-		margin-bottom: 20rpx;
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+		border-bottom: 1rpx solid #eee;
+		
+		&:last-child {
+			border-bottom: none;
+		}
 		
 		.spot-image {
-			width: 200rpx;
-			height: 200rpx;
+			width: 160rpx;
+			height: 160rpx;
 			border-radius: 8rpx;
 			margin-right: 20rpx;
 		}
@@ -431,7 +527,6 @@ export default {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				margin-bottom: 10rpx;
 				
 				.name {
 					font-size: 32rpx;
@@ -446,38 +541,30 @@ export default {
 			}
 			
 			.rating {
-				margin-bottom: 10rpx;
+				margin: 10rpx 0;
 				
 				.score {
 					font-size: 28rpx;
-					color: #FF9500;
-					font-weight: bold;
+					color: #ff9500;
 					margin-right: 20rpx;
 				}
 				
 				.price {
 					font-size: 28rpx;
-					color: #FF5B05;
-					font-weight: bold;
+					color: #ff5b05;
 				}
 			}
 			
-			.tag-list {
-				.tag {
-					display: inline-block;
-					padding: 4rpx 12rpx;
-					margin-right: 12rpx;
-					font-size: 22rpx;
-					color: #2B9939;
-					background-color: rgba(43, 153, 57, 0.1);
-					border-radius: 4rpx;
-				}
+			.address {
+				font-size: 24rpx;
+				color: #666;
+				@include text-ellipsis;
 			}
 		}
 	}
 }
 
-.loading, .no-more {
+.loading, .no-more, .empty {
 	padding: 30rpx;
 	text-align: center;
 	
@@ -485,23 +572,28 @@ export default {
 		font-size: 24rpx;
 		color: #999;
 	}
-}
-
-.empty {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding-top: 200rpx;
 	
 	image {
-		width: 300rpx;
-		height: 300rpx;
-		margin-bottom: 40rpx;
+		width: 200rpx;
+		height: 200rpx;
+		margin-bottom: 20rpx;
+	}
+}
+
+.no-result {
+	padding: 30rpx;
+	
+	.tip {
+		font-size: 28rpx;
+		color: #666;
+		text-align: center;
+		margin-bottom: 30rpx;
 	}
 	
-	text {
-		font-size: 28rpx;
-		color: #999;
+	.recommend-list {
+		background-color: #fff;
+		border-radius: 12rpx;
+		padding: 20rpx;
 	}
 }
 </style> 

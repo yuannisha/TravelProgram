@@ -3,20 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const _sfc_main = {
   data() {
     return {
-      bannerList: [
-        {
-          id: 1,
-          imageUrl: "/static/banner/banner1.jpg"
-        },
-        {
-          id: 2,
-          imageUrl: "/static/banner/banner2.jpg"
-        },
-        {
-          id: 3,
-          imageUrl: "/static/banner/banner3.jpg"
-        }
-      ],
+      bannerList: [],
       categories: [
         {
           id: 1,
@@ -39,32 +26,65 @@ const _sfc_main = {
           icon: "/static/icons/park.png"
         }
       ],
-      recommendSpots: [
-        {
-          id: 1,
-          name: "西湖风景区",
-          imageUrl: "/static/spots/spot1.jpg",
-          rating: 4.9,
-          price: 80
-        },
-        {
-          id: 2,
-          name: "故宫博物院",
-          imageUrl: "/static/spots/spot2.jpg",
-          rating: 4.8,
-          price: 60
-        },
-        {
-          id: 3,
-          name: "黄山风景区",
-          imageUrl: "/static/spots/spot3.jpg",
-          rating: 4.7,
-          price: 190
-        }
-      ]
+      recommendSpots: []
     };
   },
+  onShow() {
+    this.getBannerList();
+    this.getRecommendSpots();
+  },
   methods: {
+    // 获取轮播图数据
+    async getBannerList() {
+      try {
+        const res = await common_vendor.er.callFunction({
+          name: "get-spots",
+          data: {
+            page: 1,
+            pageSize: 3,
+            sortBy: "rating",
+            sortOrder: "desc"
+          }
+        });
+        common_vendor.index.__f__("log", "at pages/index/index.vue:99", "轮播图结果：", res);
+        if (res.result.code === 0) {
+          this.bannerList = res.result.data.list.map((item) => ({
+            id: item._id,
+            imageUrl: item.imageUrl
+          }));
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/index/index.vue:107", "获取轮播图失败:", e);
+      }
+    },
+    // 获取推荐景点
+    async getRecommendSpots() {
+      try {
+        const res = await common_vendor.er.callFunction({
+          name: "get-spots",
+          data: {
+            page: 1,
+            pageSize: 6,
+            sortBy: "commentCount",
+            sortOrder: "desc"
+          }
+        });
+        common_vendor.index.__f__("log", "at pages/index/index.vue:123", "推荐景点结果：", res);
+        if (res.result.code === 0) {
+          this.recommendSpots = res.result.data.list.map((item) => ({
+            id: item._id,
+            name: item.name,
+            imageUrl: item.imageUrl,
+            rating: item.rating,
+            price: item.price / 100
+            // 转换为元
+          }));
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/index/index.vue:134", "获取推荐景点失败:", e);
+      }
+    },
+    // 跳转到搜索页
     goToSearch() {
       common_vendor.index.navigateTo({
         url: "/pages/spots/search"
@@ -76,8 +96,8 @@ const _sfc_main = {
       });
     },
     goToCategory(id) {
-      common_vendor.index.navigateTo({
-        url: `/pages/spots/list?categoryId=${id}`
+      common_vendor.index.switchTab({
+        url: "/pages/spots/spots"
       });
     },
     goToSpots() {

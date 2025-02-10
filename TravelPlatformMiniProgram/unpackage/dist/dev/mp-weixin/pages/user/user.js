@@ -5,11 +5,7 @@ const _sfc_main = {
   data() {
     return {
       isLogin: false,
-      userInfo: {
-        avatar: "/static/avatar/default-avatar.png",
-        nickname: "游客",
-        userId: "10001"
-      }
+      userInfo: null
     };
   },
   onShow() {
@@ -21,11 +17,19 @@ const _sfc_main = {
       const token = common_vendor.index.getStorageSync("token");
       this.isLogin = !!token;
       if (this.isLogin) {
-        this.getUserInfo();
+        this.userInfo = common_vendor.index.getStorageSync("userInfo");
+        common_vendor.index.__f__("log", "at pages/user/user.vue:85", this.userInfo);
+      } else {
+        this.userInfo = {
+          avatar: "/static/avatar/default-avatar.png",
+          username: "游客",
+          userId: "10001"
+        };
       }
     },
     // 获取用户信息
     async getUserInfo() {
+      common_vendor.index.getStorageSync("userInfo", res.result.userInfo);
     },
     // 跳转到登录页
     goToLogin() {
@@ -43,16 +47,6 @@ const _sfc_main = {
         url: "/pages/user/favorites"
       });
     },
-    // 跳转到历史记录页
-    goToHistory() {
-      if (!this.isLogin) {
-        this.goToLogin();
-        return;
-      }
-      common_vendor.index.navigateTo({
-        url: "/pages/user/history"
-      });
-    },
     // 跳转到设置页
     goToSettings() {
       common_vendor.index.navigateTo({
@@ -65,18 +59,36 @@ const _sfc_main = {
         url: "/pages/user/about"
       });
     },
+    // 跳转到头像页面
+    goToAvatar() {
+      if (!this.isLogin)
+        return;
+      common_vendor.index.navigateTo({
+        url: "/pages/user/avatar"
+      });
+    },
+    // 跳转到个人信息页
+    goToProfile() {
+      if (!this.isLogin) {
+        this.goToLogin();
+        return;
+      }
+      common_vendor.index.navigateTo({
+        url: "/pages/user/profile"
+      });
+    },
     // 退出登录
     logout() {
       common_vendor.index.showModal({
         title: "提示",
         content: "确定要退出登录吗？",
-        success: (res) => {
-          if (res.confirm) {
+        success: (res2) => {
+          if (res2.confirm) {
             common_vendor.index.removeStorageSync("token");
             this.isLogin = false;
             this.userInfo = {
               avatar: "/static/avatar/default-avatar.png",
-              nickname: "游客",
+              username: "游客",
               userId: "10001"
             };
             common_vendor.index.showToast({
@@ -97,16 +109,17 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     c: common_vendor.o((...args) => $options.goToLogin && $options.goToLogin(...args))
   } : {
     d: $data.userInfo.avatar,
-    e: common_vendor.t($data.userInfo.nickname),
-    f: common_vendor.t($data.userInfo.userId)
+    e: common_vendor.o((...args) => $options.goToAvatar && $options.goToAvatar(...args)),
+    f: common_vendor.t($data.userInfo.username),
+    g: common_vendor.t($data.userInfo.id)
   }, {
-    g: common_vendor.o((...args) => $options.goToFavorites && $options.goToFavorites(...args)),
-    h: common_vendor.o((...args) => $options.goToHistory && $options.goToHistory(...args)),
-    i: common_vendor.o((...args) => $options.goToSettings && $options.goToSettings(...args)),
-    j: common_vendor.o((...args) => $options.goToAbout && $options.goToAbout(...args)),
-    k: $data.isLogin
+    h: common_vendor.o((...args) => $options.goToProfile && $options.goToProfile(...args)),
+    i: common_vendor.o((...args) => $options.goToFavorites && $options.goToFavorites(...args)),
+    j: common_vendor.o((...args) => $options.goToSettings && $options.goToSettings(...args)),
+    k: common_vendor.o((...args) => $options.goToAbout && $options.goToAbout(...args)),
+    l: $data.isLogin
   }, $data.isLogin ? {
-    l: common_vendor.o((...args) => $options.logout && $options.logout(...args))
+    m: common_vendor.o((...args) => $options.logout && $options.logout(...args))
   } : {});
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

@@ -1,7 +1,7 @@
 'use strict';
 
 const db = uniCloud.database()
-const dbCmd = db.command
+const $ = db.command.aggregate
 
 exports.main = async (event, context) => {
 	const {
@@ -11,68 +11,76 @@ exports.main = async (event, context) => {
 		images = [] // 图片列表
 	} = event
 	
-	if (!spotId) {
+	// 获取用户ID
+	const uid = event.uid
+	if (!uid) {
 		return {
-			code: -1,
-			message: '景点ID不能为空'
+			code: 403,
+			message: '请先登录'
 		}
 	}
 	
-	if (!content) {
+	// 参数验证
+	if (!spotId) {
 		return {
-			code: -1,
+			code: 1,
+			message: '景点ID不能为空'
+		}
+	}
+	if (!content || content.trim().length === 0) {
+		return {
+			code: 2,
 			message: '评论内容不能为空'
 		}
 	}
 	
 	if (!rating || rating < 1 || rating > 5) {
 		return {
-			code: -1,
+			code: 3,
 			message: '请选择评分'
 		}
 	}
 	
-	const uid = context.USERID
-	if (!uid) {
-		return {
-			code: -2,
-			message: '请先登录'
-		}
-	}
-	
-	const transaction = await db.startTransaction()
 	try {
+		const commentCollection = db.collection('travel-comments')
+		const spotCollection = db.collection('travel-spots')
+		
 		// 添加评论
-		const commentCollection = transaction.collection('travel-comments')
-		const commentResult = await commentCollection.add({
+		await commentCollection.add({
 			user_id: uid,
 			spot_id: spotId,
-			content,
-			rating,
-			images
+			content: content.trim(),
+			rating: Number(rating),
+			images: images,
+			create_date: Date.now(),
+			update_date: Date.now()
 		})
 		
-		// 更新景点评分和评论数
-		const spotCollection = transaction.collection('travel-spots')
-		const spotResult = await spotCollection.doc(spotId).update({
-			commentCount: dbCmd.inc(1),
-			rating: dbCmd.avg('$rating') // 使用聚合计算平均分
-		})
+		// 获取当前景点的所有评论
+		const commentsRes = await commentCollection.where({
+			spot_id: spotId
+		}).get()
 		
-		await transaction.commit()
+		const comments = commentsRes.data
+		const totalRating = comments.reduce((sum, comment) => sum + comment.rating, 0)
+		const newRating = (totalRating / comments.length).toFixed(1)
+		
+		// 更新景点信息
+		await spotCollection.doc(spotId).update({
+			rating: Number(newRating),
+			commentCount: comments.length
+		})
 		
 		return {
 			code: 0,
-			message: '评论成功',
-			data: {
-				id: commentResult.id
-			}
+			message: 'success'
 		}
+		
 	} catch (e) {
-		await transaction.rollback()
+		console.error('添加评论失败:', e)
 		return {
 			code: -1,
-			message: e.message || '评论失败'
+			message: '添加评论失败'
 		}
 	}
 } 

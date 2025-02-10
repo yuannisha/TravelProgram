@@ -7,7 +7,8 @@ const _sfc_main = {
       phone: "",
       code: "",
       password: "",
-      nickname: "",
+      username: "",
+      gender: 0,
       phoneError: "",
       codeError: "",
       passwordError: "",
@@ -24,7 +25,7 @@ const _sfc_main = {
     },
     // 是否可以提交
     canSubmit() {
-      return this.phone.length === 11 && this.code.length === 6 && this.password.length >= 6 && this.nickname && !this.phoneError && !this.codeError && !this.passwordError && this.agreed;
+      return this.phone.length === 11 && this.code.length === 6 && this.password.length >= 6 && this.username && this.gender !== 0 && !this.phoneError && !this.codeError && !this.passwordError && this.agreed;
     }
   },
   methods: {
@@ -87,16 +88,26 @@ const _sfc_main = {
           });
         }
       } catch (e) {
+        common_vendor.index.__f__("error", "at pages/user/register.vue:237", "发送验证码失败:", e);
         common_vendor.index.showToast({
           title: "发送失败，请重试",
           icon: "none"
         });
       }
     },
+    // 选择性别
+    selectGender(value) {
+      this.gender = value;
+    },
     // 注册
     async register() {
       if (!this.canSubmit)
         return;
+      common_vendor.index.__f__("log", "at pages/user/register.vue:253", "注册的手机号：", this.phone);
+      common_vendor.index.__f__("log", "at pages/user/register.vue:254", "注册的验证码：", this.code);
+      common_vendor.index.__f__("log", "at pages/user/register.vue:255", "注册的密码：", this.password);
+      common_vendor.index.__f__("log", "at pages/user/register.vue:256", "注册的用户名：", this.username);
+      common_vendor.index.__f__("log", "at pages/user/register.vue:257", "注册的性别：", this.gender);
       try {
         const res = await common_vendor.er.callFunction({
           name: "user-register",
@@ -104,7 +115,10 @@ const _sfc_main = {
             phone: this.phone,
             code: this.code,
             password: this.password,
-            nickname: this.nickname
+            username: this.username,
+            gender: this.gender,
+            status: 1,
+            mobile_confirmed: 1
           }
         });
         if (res.result.code === 0) {
@@ -112,7 +126,6 @@ const _sfc_main = {
             title: "注册成功",
             icon: "success"
           });
-          common_vendor.index.setStorageSync("token", res.result.token);
           setTimeout(() => {
             common_vendor.index.navigateBack();
           }, 1500);
@@ -123,6 +136,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
+        common_vendor.index.__f__("error", "at pages/user/register.vue:290", "注册失败:", e);
         common_vendor.index.showToast({
           title: "注册失败，请重试",
           icon: "none"
@@ -174,16 +188,20 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, $data.passwordError ? {
     s: common_vendor.t($data.passwordError)
   } : {}, {
-    t: $data.nickname,
-    v: common_vendor.o(($event) => $data.nickname = $event.detail.value),
-    w: $options.canSubmit ? 1 : "",
-    x: !$options.canSubmit,
-    y: common_vendor.o((...args) => $options.register && $options.register(...args)),
-    z: $data.agreed,
-    A: common_vendor.o(($event) => $data.agreed = !$data.agreed),
-    B: common_vendor.o((...args) => $options.goToUserAgreement && $options.goToUserAgreement(...args)),
-    C: common_vendor.o((...args) => $options.goToPrivacyPolicy && $options.goToPrivacyPolicy(...args)),
-    D: common_vendor.o((...args) => $options.goToLogin && $options.goToLogin(...args))
+    t: $data.username,
+    v: common_vendor.o(($event) => $data.username = $event.detail.value),
+    w: $data.gender === 1 ? 1 : "",
+    x: common_vendor.o(($event) => $options.selectGender(1)),
+    y: $data.gender === 2 ? 1 : "",
+    z: common_vendor.o(($event) => $options.selectGender(2)),
+    A: $options.canSubmit ? 1 : "",
+    B: !$options.canSubmit,
+    C: common_vendor.o((...args) => $options.register && $options.register(...args)),
+    D: $data.agreed,
+    E: common_vendor.o(($event) => $data.agreed = !$data.agreed),
+    F: common_vendor.o((...args) => $options.goToUserAgreement && $options.goToUserAgreement(...args)),
+    G: common_vendor.o((...args) => $options.goToPrivacyPolicy && $options.goToPrivacyPolicy(...args)),
+    H: common_vendor.o((...args) => $options.goToLogin && $options.goToLogin(...args))
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

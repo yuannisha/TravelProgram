@@ -2,128 +2,99 @@
 
 const db = uniCloud.database()
 const $ = db.command.aggregate
-const spotCollection = db.collection('travel-spots')
-const commentCollection = db.collection('travel-comments')
-const favoriteCollection = db.collection('travel-favorites')
 
 exports.main = async (event, context) => {
-	const {
-		id, // 景点ID
-		longitude, // 经度
-		latitude // 纬度
-	} = event
+	const { id } = event
 	
 	if (!id) {
 		return {
-			code: -1,
+			code: 1,
 			message: '景点ID不能为空'
 		}
 	}
 	
 	try {
-		// 获取景点基本信息
-		const spotPipeline = [{
-			$match: {
-				_id: id
-			}
-		}]
+		// 获取用户ID（如果已登录）
+		const { USERID } = context.auth || {}
 		
-		// 如果提供了经纬度，计算距离
-		if (longitude && latitude) {
-			spotPipeline.push({
-				$geoNear: {
-					near: {
-						type: 'Point',
-						coordinates: [parseFloat(longitude), parseFloat(latitude)]
-					},
-					distanceField: 'distance',
-					spherical: true,
-					distanceMultiplier: 0.001 // 转换为公里
-				}
-			})
+		// 聚合查询
+		const spotCollection = db.collection('travel-spots')
+		const favoriteCollection = db.collection('travel-favorites')
+		const commentCollection = db.collection('travel-comments')
+		const userCollection = db.collection('uni-id-users')
+		
+		// 获取景点基本信息
+		const spotInfo = await spotCollection.doc(id).get()
+		if (!spotInfo.data || spotInfo.data.length === 0) {
+			return {
+				code: 2,
+				message: '景点不存在'
+			}
 		}
 		
-		// 获取评论列表（最新的5条）
-		const commentPipeline = [{
-			$match: {
+		const spot = spotInfo.data[0]
+		
+		// 检查是否已收藏（需要登录）
+		let isFavorite = false
+		if (USERID) {
+			const favorite = await favoriteCollection.where({
+				user_id: USERID,
 				spot_id: id
-			}
-		}, {
-			$sort: {
+			}).get()
+			isFavorite = favorite.data && favorite.data.length > 0
+		}
+		
+		// 获取最新的3条评论
+		const comments = await commentCollection.aggregate()
+			.match({
+				spot_id: id
+			})
+			.sort({
 				create_date: -1
-			}
-		}, {
-			$limit: 5
-		}, {
-			$lookup: {
+			})
+			.limit(3)
+			.lookup({
 				from: 'uni-id-users',
 				localField: 'user_id',
 				foreignField: '_id',
 				as: 'user'
-			}
-		}, {
-			$project: {
+			})
+			.project({
 				_id: 1,
 				content: 1,
 				rating: 1,
 				images: 1,
 				create_date: 1,
 				'user._id': 1,
-				'user.nickname': 1,
+				'user.username': 1,
 				'user.avatar': 1
+			})
+			.end()
+		
+		// 处理评论数据
+		const formattedComments = comments.data.map(comment => ({
+			...comment,
+			user: comment.user[0] || {
+				username: '未知用户',
+				avatar: '/static/images/default-avatar.png'
 			}
-		}]
-		
-		// 获取是否已收藏
-		const uid = context.USERID
-		let isFavorite = false
-		if (uid) {
-			const favoriteResult = await favoriteCollection.where({
-				user_id: uid,
-				spot_id: id
-			}).count()
-			isFavorite = favoriteResult.total > 0
-		}
-		
-		// 并行执行查询
-		const [spotResult, commentResult] = await Promise.all([
-			spotCollection.aggregate(spotPipeline).end(),
-			commentCollection.aggregate(commentPipeline).end()
-		])
-		
-		if (!spotResult.data[0]) {
-			return {
-				code: -1,
-				message: '景点不存在'
-			}
-		}
-		
-		// 处理评论用户信息
-		const comments = commentResult.data.map(comment => {
-			const user = comment.user[0] || {}
-			return {
-				...comment,
-				user: {
-					id: user._id,
-					nickname: user.nickname || '游客',
-					avatar: user.avatar || '/static/avatar/default-avatar.png'
-				}
-			}
-		})
+		}))
 		
 		return {
 			code: 0,
 			message: 'success',
 			data: {
-				...spotResult.data[0],
+				...spot,
 				isFavorite,
-				comments
+				comments: formattedComments
 			}
 		}
+		
 	} catch (e) {
+		console.error('获取景点详情失败:', e)
 		return {
 			code: -1,
-			message: e.message || '获取景点详情失败'
+			message: '获取景点详情失败'
 		}
 	}
 } 

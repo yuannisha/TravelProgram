@@ -23,15 +23,20 @@ const _sfc_main = {
       // 热门搜索
       spotList: [],
       // 搜索结果
+      recommendList: [],
+      // 推荐景点列表
       page: 1,
       pageSize: 10,
       loading: false,
-      noMore: false
+      noMore: false,
+      longitude: null,
+      latitude: null
     };
   },
   onLoad() {
     this.getSearchHistory();
     this.getCurrentLocation();
+    this.getRecommendSpots();
   },
   methods: {
     // 获取搜索历史
@@ -98,30 +103,43 @@ const _sfc_main = {
     },
     // 搜索
     async search() {
+      common_vendor.index.__f__("log", "at pages/spots/search.vue:242", "搜索关键词", this.keyword);
       if (!this.keyword)
         return;
       this.page = 1;
       this.spotList = [];
       this.noMore = false;
-      this.saveSearchHistory();
-      await this.getSearchResult();
+      this.loading = true;
+      try {
+        common_vendor.index.__f__("log", "at pages/spots/search.vue:251", "搜索开始");
+        await this.getSearchResult();
+        this.saveSearchHistory();
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/spots/search.vue:255", "搜索失败:", e);
+        common_vendor.index.showToast({
+          title: "搜索失败，请重试",
+          icon: "none"
+        });
+      } finally {
+        this.loading = false;
+      }
     },
     // 获取搜索结果
     async getSearchResult() {
-      if (this.loading || this.noMore)
-        return;
-      this.loading = true;
+      common_vendor.index.__f__("log", "at pages/spots/search.vue:267", "获取搜索结果");
+      common_vendor.index.__f__("log", "at pages/spots/search.vue:268", "loading", this.loading);
       try {
         const res = await common_vendor.er.callFunction({
           name: "get-spots",
           data: {
             keyword: this.keyword,
-            longitude: this.longitude,
-            latitude: this.latitude,
             page: this.page,
-            pageSize: this.pageSize
+            pageSize: this.pageSize,
+            longitude: this.longitude,
+            latitude: this.latitude
           }
         });
+        common_vendor.index.__f__("log", "at pages/spots/search.vue:282", "搜索结果：", res);
         if (res.result.code === 0) {
           const { list, total } = res.result.data;
           if (this.page === 1) {
@@ -130,14 +148,19 @@ const _sfc_main = {
             this.spotList = [...this.spotList, ...list];
           }
           this.noMore = this.spotList.length >= total;
+          if (this.page === 1 && list.length === 0) {
+            common_vendor.index.showToast({
+              title: "未找到相关景点",
+              icon: "none"
+            });
+          }
+        } else {
+          throw new Error(res.result.message);
         }
       } catch (e) {
-        common_vendor.index.showToast({
-          title: "搜索失败",
-          icon: "none"
-        });
+        common_vendor.index.__f__("error", "at pages/spots/search.vue:306", "获取搜索结果失败:", e);
+        throw e;
       }
-      this.loading = false;
     },
     // 加载更多
     loadMore() {
@@ -155,6 +178,25 @@ const _sfc_main = {
     // 返回上一页
     goBack() {
       common_vendor.index.navigateBack();
+    },
+    // 获取推荐景点
+    async getRecommendSpots() {
+      try {
+        const res = await common_vendor.er.callFunction({
+          name: "get-spots",
+          data: {
+            page: 1,
+            pageSize: 5,
+            sortBy: "rating",
+            sortOrder: "desc"
+          }
+        });
+        if (res.result.code === 0) {
+          this.recommendList = res.result.data.list;
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/spots/search.vue:348", "获取推荐景点失败:", e);
+      }
     }
   }
 };
@@ -163,26 +205,31 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     a: common_vendor.o((...args) => $options.search && $options.search(...args)),
     b: $data.keyword,
     c: common_vendor.o(($event) => $data.keyword = $event.detail.value),
-    d: $data.keyword
+    d: common_assets._imports_0$3,
+    e: common_vendor.o((...args) => $options.search && $options.search(...args)),
+    f: $data.keyword
   }, $data.keyword ? {
-    e: common_vendor.o((...args) => $options.clearKeyword && $options.clearKeyword(...args))
+    g: common_assets._imports_1,
+    h: common_vendor.o((...args) => $options.clearKeyword && $options.clearKeyword(...args))
   } : {}, {
-    f: common_vendor.o((...args) => $options.goBack && $options.goBack(...args)),
-    g: !$data.keyword && $data.searchHistory.length > 0
+    i: common_vendor.o((...args) => $options.goBack && $options.goBack(...args)),
+    j: !$data.keyword && $data.searchHistory.length > 0
   }, !$data.keyword && $data.searchHistory.length > 0 ? {
-    h: common_vendor.o((...args) => $options.clearHistory && $options.clearHistory(...args)),
-    i: common_vendor.f($data.searchHistory, (item, index, i0) => {
+    k: common_vendor.o((...args) => $options.clearHistory && $options.clearHistory(...args)),
+    l: common_vendor.f($data.searchHistory, (item, index, i0) => {
       return {
         a: common_vendor.t(item),
         b: common_vendor.o(($event) => $options.removeHistory(index), index),
         c: index,
         d: common_vendor.o(($event) => $options.useHistory(item), index)
       };
-    })
+    }),
+    m: common_assets._imports_2,
+    n: common_assets._imports_1
   } : {}, {
-    j: !$data.keyword
+    o: !$data.keyword
   }, !$data.keyword ? {
-    k: common_vendor.f($data.hotKeywords, (item, index, i0) => {
+    p: common_vendor.f($data.hotKeywords, (item, index, i0) => {
       return {
         a: common_vendor.t(index + 1),
         b: index < 3 ? 1 : "",
@@ -191,8 +238,12 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         e: common_vendor.o(($event) => $options.useHot(item), index)
       };
     })
-  } : common_vendor.e({
-    l: common_vendor.f($data.spotList, (item, index, i0) => {
+  } : {}, {
+    q: $data.keyword
+  }, $data.keyword ? common_vendor.e({
+    r: $data.spotList.length === 0 && !$data.loading
+  }, $data.spotList.length === 0 && !$data.loading ? {
+    s: common_vendor.f($data.recommendList, (item, index, i0) => {
       return common_vendor.e({
         a: item.imageUrl,
         b: common_vendor.t(item.name),
@@ -201,27 +252,35 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         d: common_vendor.t(item.distance.toFixed(1))
       } : {}, {
         e: common_vendor.t(item.rating),
-        f: common_vendor.t(item.price),
-        g: common_vendor.f(item.tags, (tag, tagIndex, i1) => {
-          return {
-            a: common_vendor.t(tag),
-            b: tagIndex
-          };
-        }),
+        f: common_vendor.t(item.price / 100),
+        g: common_vendor.t(item.address),
         h: index,
         i: common_vendor.o(($event) => $options.goToDetail(item._id), index)
       });
-    }),
-    m: $data.loading
+    })
+  } : {
+    t: common_vendor.f($data.spotList, (item, index, i0) => {
+      return common_vendor.e({
+        a: item.imageUrl,
+        b: common_vendor.t(item.name),
+        c: item.distance
+      }, item.distance ? {
+        d: common_vendor.t(item.distance.toFixed(1))
+      } : {}, {
+        e: common_vendor.t(item.rating),
+        f: common_vendor.t(item.price / 100),
+        g: common_vendor.t(item.address),
+        h: index,
+        i: common_vendor.o(($event) => $options.goToDetail(item._id), index)
+      });
+    })
+  }, {
+    v: $data.loading
   }, $data.loading ? {} : {}, {
-    n: $data.noMore
+    w: $data.noMore
   }, $data.noMore ? {} : {}, {
-    o: !$data.loading && $data.spotList.length === 0
-  }, !$data.loading && $data.spotList.length === 0 ? {
-    p: common_assets._imports_0$3
-  } : {}, {
-    q: common_vendor.o((...args) => $options.loadMore && $options.loadMore(...args))
-  }));
+    x: common_vendor.o((...args) => $options.loadMore && $options.loadMore(...args))
+  }) : {});
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);
 wx.createPage(MiniProgramPage);

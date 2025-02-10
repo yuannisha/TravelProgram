@@ -6,11 +6,18 @@ if (!Math) {
   "./pages/spots/spots.js";
   "./pages/map/map.js";
   "./pages/user/user.js";
+  "./pages/user/avatar.js";
+  "./pages/user/profile.js";
+  "./pages/user/change-password.js";
+  "./pages/user/change-mobile.js";
   "./pages/spots/detail.js";
   "./pages/user/login.js";
   "./pages/user/register.js";
   "./pages/user/favorites.js";
   "./pages/spots/search.js";
+  "./pages/user/settings.js";
+  "./pages/user/about.js";
+  "./pages/spots/comments.js";
 }
 const _sfc_main = {
   onLaunch: function() {

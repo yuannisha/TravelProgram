@@ -26,12 +26,6 @@
 </script>
 
 <style lang="scss">
-	/* 引入图标字体 */
-	@font-face {
-		font-family: "iconfont";
-		src: url('/static/fonts/iconfont.ttf') format('truetype');
-	}
-
 	/* 全局样式 */
 	page {
 		background-color: $bg-color;

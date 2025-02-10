@@ -367,86 +367,73 @@
   padding: 60rpx 40rpx;
 }
 .header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 80rpx;
-}
-.header .logo {
-  width: 160rpx;
-  height: 160rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 60rpx;
 }
 .header .title {
-  font-size: 40rpx;
-  color: #333;
+  font-size: 48rpx;
   font-weight: bold;
-  margin-bottom: 10rpx;
+  color: #333;
+  margin-bottom: 20rpx;
 }
 .header .subtitle {
   font-size: 28rpx;
   color: #999;
 }
-.form-box .input-group {
-  margin-bottom: 40rpx;
+.form {
+  margin-bottom: 60rpx;
 }
-.form-box .input-group .label {
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 20rpx;
-  display: block;
-}
-.form-box .input-group .input-box {
+.form .form-item {
   display: flex;
   align-items: center;
-  height: 88rpx;
+  height: 100rpx;
   padding: 0 30rpx;
   background-color: #f5f5f5;
   border-radius: 12rpx;
+  margin-bottom: 20rpx;
 }
-.form-box .input-group .input-box .prefix {
-  font-size: 28rpx;
-  color: #333;
+.form .form-item .iconfont {
+  font-size: 40rpx;
+  color: #999;
   margin-right: 20rpx;
 }
-.form-box .input-group .input-box input {
+.form .form-item input {
   flex: 1;
   height: 100%;
   font-size: 28rpx;
-  color: #333;
 }
-.form-box .input-group .input-box .code-btn {
+.form .form-item .code-btn {
   width: 200rpx;
   height: 60rpx;
   line-height: 60rpx;
+  text-align: center;
   font-size: 24rpx;
+  color: #999;
+  background-color: #eee;
+  border-radius: 30rpx;
+  margin-left: 20rpx;
+}
+.form .form-item .code-btn.active {
   color: #fff;
   background-color: #2B9939;
-  border-radius: 30rpx;
-  padding: 0;
-  margin: 0;
 }
-.form-box .input-group .input-box .code-btn[disabled] {
-  background-color: #ccc;
-}
-.form-box .input-group .input-box .code-btn::after {
+.form .form-item .code-btn::after {
   border: none;
 }
-.form-box .input-group .error {
+.form .error-text {
   font-size: 24rpx;
-  color: #FF5B05;
-  margin-top: 10rpx;
+  color: #ff5b05;
+  margin: -10rpx 0 20rpx 30rpx;
 }
 .submit-btn {
   width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
+  height: 90rpx;
+  line-height: 90rpx;
   text-align: center;
-  background-color: #ccc;
-  color: #fff;
   font-size: 32rpx;
-  border-radius: 44rpx;
-  margin: 60rpx 0;
+  color: #fff;
+  background-color: #ddd;
+  border-radius: 45rpx;
+  margin-bottom: 40rpx;
 }
 .submit-btn.active {
   background-color: #2B9939;
@@ -458,6 +445,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 40rpx;
 }
 .agreement checkbox {
   transform: scale(0.7);
@@ -469,4 +457,14 @@
 }
 .agreement .agreement-text .link {
   color: #2B9939;
+}
+.register-link {
+  text-align: center;
+  font-size: 28rpx;
+  color: #999;
+  margin-top: 40rpx;
+}
+.register-link .link {
+  color: #2B9939;
+  margin-left: 10rpx;
 }

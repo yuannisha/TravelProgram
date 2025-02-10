@@ -390,7 +390,7 @@
 .user-card .user-info .info-right {
   margin-left: 30rpx;
 }
-.user-card .user-info .info-right .nickname {
+.user-card .user-info .info-right .username {
   font-size: 36rpx;
   color: #fff;
   font-weight: bold;

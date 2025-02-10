@@ -53,20 +53,7 @@
 export default {
 	data() {
 		return {
-			bannerList: [
-				{
-					id: 1,
-					imageUrl: '/static/banner/banner1.jpg'
-				},
-				{
-					id: 2,
-					imageUrl: '/static/banner/banner2.jpg'
-				},
-				{
-					id: 3,
-					imageUrl: '/static/banner/banner3.jpg'
-				}
-			],
+			bannerList: [],
 			categories: [
 				{
 					id: 1,
@@ -89,34 +76,66 @@ export default {
 					icon: '/static/icons/park.png'
 				}
 			],
-			recommendSpots: [
-				{
-					id: 1,
-					name: '西湖风景区',
-					imageUrl: '/static/spots/spot1.jpg',
-					rating: 4.9,
-					price: 80
-				},
-				{
-					id: 2,
-					name: '故宫博物院',
-					imageUrl: '/static/spots/spot2.jpg',
-					rating: 4.8,
-					price: 60
-				},
-				{
-					id: 3,
-					name: '黄山风景区',
-					imageUrl: '/static/spots/spot3.jpg',
-					rating: 4.7,
-					price: 190
-				}
-			]
+			recommendSpots: []
 		}
 	},
+	onShow() {
+		this.getBannerList()
+		this.getRecommendSpots()
+	},
 	methods: {
+		// 获取轮播图数据
+		async getBannerList() {
+			try {
+				const res = await uniCloud.callFunction({
+					name: 'get-spots',
+					data: {
+						page: 1,
+						pageSize: 3,
+						sortBy: 'rating',
+						sortOrder: 'desc'
+					}
+				})
+				console.log("轮播图结果：",res)	
+				if (res.result.code === 0) {
+					this.bannerList = res.result.data.list.map(item => ({
+						id: item._id,
+						imageUrl: item.imageUrl
+					}))
+				}
+			} catch (e) {
+				console.error('获取轮播图失败:', e)
+			}
+		},
+		
+		// 获取推荐景点
+		async getRecommendSpots() {
+			try {
+				const res = await uniCloud.callFunction({
+					name: 'get-spots',
+					data: {
+						page: 1,
+						pageSize: 6,
+						sortBy: 'commentCount',
+						sortOrder: 'desc'
+					}
+				})
+				console.log("推荐景点结果：",res)	
+				if (res.result.code === 0) {
+					this.recommendSpots = res.result.data.list.map(item => ({
+						id: item._id,
+						name: item.name,
+						imageUrl: item.imageUrl,
+						rating: item.rating,
+						price: item.price / 100 // 转换为元
+					}))
+				}
+			} catch (e) {
+				console.error('获取推荐景点失败:', e)
+			}
+		},
+		// 跳转到搜索页
 		goToSearch() {
-			// 跳转到搜索页面
 			uni.navigateTo({
 				url: '/pages/spots/search'
 			})
@@ -129,8 +148,8 @@ export default {
 		},
 		goToCategory(id) {
 			// 跳转到分类页面
-			uni.navigateTo({
-				url: `/pages/spots/list?categoryId=${id}`
+			uni.switchTab({
+				url: '/pages/spots/spots'
 			})
 		},
 		goToSpots() {
@@ -149,25 +168,27 @@ export default {
 }
 
 .search-box {
-	padding: 20rpx 30rpx;
-	background-color: #2B9939;
+	display: flex;
+	align-items: center;
+	background-color: #fff;
+	border-radius: 36rpx;
+	padding: 0 30rpx;
+	height: 72rpx;
+	margin: 20rpx 30rpx;
 	
-	.search-input {
-		display: flex;
-		align-items: center;
-		height: 72rpx;
-		padding: 0 30rpx;
-		background: rgba(255, 255, 255, 0.9);
-		border-radius: 36rpx;
+	.iconfont {
+		font-size: 36rpx;
+		color: #999;
+		margin-right: 10rpx;
+	}
+	
+	input {
+		flex: 1;
+		height: 100%;
+		font-size: 28rpx;
+		color: #333;
 		
-		.icon-search {
-			font-size: 32rpx;
-			color: #666;
-			margin-right: 10rpx;
-		}
-		
-		.placeholder {
-			font-size: 28rpx;
+		&::placeholder {
 			color: #999;
 		}
 	}

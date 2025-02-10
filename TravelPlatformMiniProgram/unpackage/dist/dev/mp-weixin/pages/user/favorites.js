@@ -4,34 +4,16 @@ const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
-      favoriteList: [
-        {
-          id: 1,
-          name: "西湖风景区",
-          imageUrl: "/static/spots/spot1.jpg",
-          rating: 4.9,
-          price: 80,
-          tags: ["5A景区", "湖泊", "游船"],
-          favoriteTime: "2024-02-08"
-        },
-        {
-          id: 2,
-          name: "故宫博物院",
-          imageUrl: "/static/spots/spot2.jpg",
-          rating: 4.8,
-          price: 60,
-          tags: ["5A景区", "古建筑", "文物"],
-          favoriteTime: "2024-02-07"
-        }
-      ],
+      favoriteList: [],
       page: 1,
+      pageSize: 10,
       loading: false,
       noMore: false,
       isRefreshing: false
     };
   },
-  onLoad() {
-    this.getFavoriteList();
+  onShow() {
+    this.refresh();
   },
   methods: {
     // 获取收藏列表
@@ -39,11 +21,93 @@ const _sfc_main = {
       if (this.loading || this.noMore)
         return;
       this.loading = true;
-      await new Promise((resolve) => setTimeout(resolve, 1e3));
-      this.loading = false;
-      if (this.page > 2) {
-        this.noMore = true;
+      try {
+        const uid = common_vendor.index.getStorageSync("userInfo");
+        common_vendor.index.__f__("log", "at pages/user/favorites.vue:88", "uid", uid);
+        const res = await common_vendor.er.callFunction({
+          name: "get-favorites",
+          data: {
+            uid: uid.id,
+            page: this.page,
+            pageSize: this.pageSize
+          }
+        });
+        common_vendor.index.__f__("log", "at pages/user/favorites.vue:97", "res", res);
+        if (res.result.code === 0) {
+          common_vendor.index.__f__("log", "at pages/user/favorites.vue:99", "获取收藏列表成功", res);
+          const { list, total } = res.result.data;
+          const promises = list.map(
+            (item) => common_vendor.er.callFunction({
+              name: "get-spot-withId",
+              data: {
+                id: item.spot_id
+              }
+            })
+          );
+          const spotResults = await Promise.all(promises);
+          const favorites = spotResults.map((result) => {
+            const spotData = result.result.data[0];
+            return {
+              id: spotData._id,
+              name: spotData.name,
+              imageUrl: spotData.imageUrl,
+              rating: spotData.rating,
+              price: spotData.price / 100,
+              tags: spotData.tags || []
+            };
+          });
+          common_vendor.index.__f__("log", "at pages/user/favorites.vue:124", "favorites", favorites);
+          if (this.page === 1) {
+            this.favoriteList = favorites;
+            common_vendor.index.__f__("log", "at pages/user/favorites.vue:128", "this.favoriteList", this.favoriteList);
+          } else {
+            this.favoriteList = [...this.favoriteList, ...favorites];
+            common_vendor.index.__f__("log", "at pages/user/favorites.vue:131", "this.favoriteList", this.favoriteList);
+          }
+          this.noMore = this.favoriteList.length >= total;
+        }
+      } catch (e) {
+        common_vendor.index.__f__("error", "at pages/user/favorites.vue:137", "获取收藏列表失败:", e);
+        common_vendor.index.showToast({
+          title: "获取收藏列表失败",
+          icon: "none"
+        });
       }
+      this.loading = false;
+    },
+    // 取消收藏
+    async cancelFavorite(item, index) {
+      common_vendor.index.showModal({
+        title: "提示",
+        content: "确定要取消收藏该景点吗？",
+        success: async (res) => {
+          if (res.confirm) {
+            try {
+              const uid = common_vendor.index.getStorageSync("userInfo");
+              const res2 = await common_vendor.er.callFunction({
+                name: "toggle-favorite",
+                data: {
+                  spotId: item.id,
+                  uid: uid.id
+                }
+              });
+              if (res2.result.code === 0) {
+                this.favoriteList.splice(index, 1);
+                common_vendor.index.showToast({
+                  title: "已取消收藏",
+                  icon: "none"
+                });
+              }
+            } catch (e) {
+              common_vendor.index.__f__("error", "at pages/user/favorites.vue:172", "取消收藏失败:", e);
+              common_vendor.index.showToast({
+                title: "操作失败",
+                icon: "none"
+              });
+            }
+          }
+        }
+      });
     },
     // 下拉刷新
     async refresh() {
@@ -59,22 +123,6 @@ const _sfc_main = {
         this.page++;
         this.getFavoriteList();
       }
-    },
-    // 取消收藏
-    cancelFavorite(item, index) {
-      common_vendor.index.showModal({
-        title: "提示",
-        content: "确定要取消收藏该景点吗？",
-        success: (res) => {
-          if (res.confirm) {
-            this.favoriteList.splice(index, 1);
-            common_vendor.index.showToast({
-              title: "已取消收藏",
-              icon: "none"
-            });
-          }
-        }
-      });
     },
     // 分享
     share(item) {

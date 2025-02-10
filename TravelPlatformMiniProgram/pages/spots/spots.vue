@@ -80,49 +80,37 @@ export default {
 				{ id: 4, name: '主题乐园' }
 			],
 			currentCategory: 0,
-			spotList: [
-				{
-					id: 1,
-					name: '西湖风景区',
-					imageUrl: '/static/spots/spot1.jpg',
-					distance: 2.5,
-					tags: ['5A景区', '湖泊', '游船'],
-					rating: 4.9,
-					commentCount: 12580,
-					price: 80
-				},
-				{
-					id: 2,
-					name: '故宫博物院',
-					imageUrl: '/static/spots/spot2.jpg',
-					distance: 5.1,
-					tags: ['5A景区', '古建筑', '文物'],
-					rating: 4.8,
-					commentCount: 25890,
-					price: 60
-				},
-				{
-					id: 3,
-					name: '黄山风景区',
-					imageUrl: '/static/spots/spot3.jpg',
-					distance: 8.2,
-					tags: ['5A景区', '山岳', '云海'],
-					rating: 4.7,
-					commentCount: 8956,
-					price: 190
-				}
-			],
+			spotList: [],
 			page: 1,
+			pageSize: 10,
 			loading: false,
 			noMore: false,
-			isRefreshing: false
+			isRefreshing: false,
+			longitude: null,
+			latitude: null
 		}
 	},
 	onLoad() {
-		// 获取景点列表数据
-		this.getSpotList()
+		// 获取当前位置
+		this.getCurrentLocation()
 	},
 	methods: {
+		// 获取当前位置
+		getCurrentLocation() {
+			uni.getLocation({
+				type: 'gcj02',
+				success: res => {
+					this.longitude = res.longitude
+					this.latitude = res.latitude
+					this.getSpotList()
+				},
+				fail: () => {
+					// 获取位置失败，仍然获取景点列表，但不会有距离信息
+					this.getSpotList()
+				}
+			})
+		},
+		
 		// 切换分类
 		changeCategory(id) {
 			if (this.currentCategory === id) return
@@ -138,16 +126,50 @@ export default {
 			if (this.loading || this.noMore) return
 			this.loading = true
 			
-			// 模拟接口请求
-			await new Promise(resolve => setTimeout(resolve, 1000))
-			
-			// TODO: 实际项目中这里需要调用后端接口
-			this.loading = false
-			
-			// 模拟没有更多数据
-			if (this.page > 2) {
-				this.noMore = true
+			try {
+				const res = await uniCloud.callFunction({
+					name: 'get-spots',
+					data: {
+						categoryId: this.currentCategory,
+						page: this.page,
+						pageSize: this.pageSize,
+						longitude: this.longitude,
+						latitude: this.latitude
+					}
+				})
+				
+				if (res.result.code === 0) {
+					const { list, total } = res.result.data
+					
+					// 处理数据
+					const spots = list.map(item => ({
+						id: item._id,
+						name: item.name,
+						imageUrl: item.imageUrl,
+						distance: item.distance ? Number(item.distance.toFixed(1)) : null,
+						tags: item.tags || [],
+						rating: item.rating,
+						commentCount: item.commentCount,
+						price: item.price / 100 // 转换为元
+					}))
+					
+					if (this.page === 1) {
+						this.spotList = spots
+					} else {
+						this.spotList = [...this.spotList, ...spots]
+					}
+					
+					this.noMore = this.spotList.length >= total
+				}
+			} catch (e) {
+				console.error('获取景点列表失败:', e)
+				uni.showToast({
+					title: '获取景点列表失败',
+					icon: 'none'
+				})
 			}
+			
+			this.loading = false
 		},
 		
 		// 下拉刷新

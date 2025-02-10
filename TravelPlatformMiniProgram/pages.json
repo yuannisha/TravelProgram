@@ -3,7 +3,7 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "旅游平台",
+				"navigationBarTitleText": "首页",
 				"enablePullDownRefresh": true
 			}
 		},
@@ -24,6 +24,30 @@
 			"path": "pages/user/user",
 			"style": {
 				"navigationBarTitleText": "我的"
+			}
+		},
+		{
+			"path": "pages/user/avatar",
+			"style": {
+				"navigationBarTitleText": "头像"
+			}
+		},
+		{
+			"path": "pages/user/profile",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
+		},
+		{
+			"path": "pages/user/change-password",
+			"style": {
+				"navigationBarTitleText": "修改密码"
+			}
+		},
+		{
+			"path": "pages/user/change-mobile",
+			"style": {
+				"navigationBarTitleText": "更换手机号"
 			}
 		},
 		{
@@ -56,6 +80,28 @@
 			"style": {
 				"navigationBarTitleText": "搜索"
 			}
+		},
+		{
+			"path": "pages/user/settings",
+			"style": {
+				"navigationBarTitleText": "设置"
+			}
+		},
+		{
+			"path": "pages/user/about",
+			"style": {
+				"navigationBarTitleText": "关于我们"
+			}
+		},
+		{
+			"path": "pages/spots/comments",
+			"style": {
+				"navigationBarTitleText": "全部评论",
+				"enablePullDownRefresh": false,
+				"app-plus": {
+					"bounce": "none"
+				}
+			}
 		}
 	],
 	"globalStyle": {
@@ -65,7 +111,7 @@
 		"backgroundColor": "#F8F8F8"
 	},
 	"tabBar": {
-		"color": "#7A7E83",
+		"color": "#999999",
 		"selectedColor": "#2B9939",
 		"borderStyle": "black",
 		"backgroundColor": "#FFFFFF",

@@ -7,10 +7,10 @@
 				<text class="login-text">登录/注册</text>
 			</view>
 			<view class="user-info" v-else>
-				<image class="avatar" :src="userInfo.avatar" mode="aspectFill"></image>
+				<image class="avatar" :src="userInfo.avatar" mode="aspectFill" @click="goToAvatar"></image>
 				<view class="info-right">
-					<text class="nickname">{{userInfo.nickname}}</text>
-					<text class="user-id">ID: {{userInfo.userId}}</text>
+					<text class="username">{{userInfo.username}}</text>
+					<text class="user-id">ID: {{userInfo.id}}</text>
 				</view>
 			</view>
 		</view>
@@ -18,17 +18,17 @@
 		<!-- 功能列表 -->
 		<view class="menu-list">
 			<view class="menu-group">
+				<view class="menu-item" @click="goToProfile">
+					<view class="left">
+						<text class="iconfont icon-user"></text>
+						<text class="title">个人信息</text>
+					</view>
+					<text class="iconfont icon-arrow-right"></text>
+				</view>
 				<view class="menu-item" @click="goToFavorites">
 					<view class="left">
 						<text class="iconfont icon-heart"></text>
 						<text class="title">我的收藏</text>
-					</view>
-					<text class="iconfont icon-arrow-right"></text>
-				</view>
-				<view class="menu-item" @click="goToHistory">
-					<view class="left">
-						<text class="iconfont icon-history"></text>
-						<text class="title">浏览历史</text>
 					</view>
 					<text class="iconfont icon-arrow-right"></text>
 				</view>
@@ -66,11 +66,7 @@ export default {
 	data() {
 		return {
 			isLogin: false,
-			userInfo: {
-				avatar: '/static/avatar/default-avatar.png',
-				nickname: '游客',
-				userId: '10001'
-			}
+			userInfo: null
 		}
 	},
 	onShow() {
@@ -84,13 +80,23 @@ export default {
 			const token = uni.getStorageSync('token')
 			this.isLogin = !!token
 			if (this.isLogin) {
-				this.getUserInfo()
+				//this.getUserInfo()
+				this.userInfo = uni.getStorageSync('userInfo')
+				console.log(this.userInfo)
+			}else{
+				this.userInfo = {
+					avatar: '/static/avatar/default-avatar.png',
+
+					username: '游客',
+					userId: '10001'
+				}
 			}
-		},
-		
+		},	
+
 		// 获取用户信息
 		async getUserInfo() {
 			// TODO: 调用后端接口获取用户信息
+			uni.getStorageSync('userInfo', res.result.userInfo)
 		},
 		
 		// 跳转到登录页
@@ -111,16 +117,6 @@ export default {
 			})
 		},
 		
-		// 跳转到历史记录页
-		goToHistory() {
-			if (!this.isLogin) {
-				this.goToLogin()
-				return
-			}
-			uni.navigateTo({
-				url: '/pages/user/history'
-			})
-		},
 		
 		// 跳转到设置页
 		goToSettings() {
@@ -136,6 +132,25 @@ export default {
 			})
 		},
 		
+		// 跳转到头像页面
+		goToAvatar() {
+			if (!this.isLogin) return
+			uni.navigateTo({
+				url: '/pages/user/avatar'
+			})
+		},
+		
+		// 跳转到个人信息页
+		goToProfile() {
+			if (!this.isLogin) {
+				this.goToLogin()
+				return
+			}
+			uni.navigateTo({
+				url: '/pages/user/profile'
+			})
+		},
+		
 		// 退出登录
 		logout() {
 			uni.showModal({
@@ -147,7 +162,7 @@ export default {
 						this.isLogin = false
 						this.userInfo = {
 							avatar: '/static/avatar/default-avatar.png',
-							nickname: '游客',
+							username: '游客',
 							userId: '10001'
 						}
 						uni.showToast({
@@ -193,7 +208,7 @@ export default {
 		.info-right {
 			margin-left: 30rpx;
 			
-			.nickname {
+			.username {
 				font-size: 36rpx;
 				color: #fff;
 				font-weight: bold;

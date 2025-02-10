@@ -367,24 +367,29 @@
   padding-bottom: 20rpx;
 }
 .search-box {
-  padding: 20rpx 30rpx;
-  background-color: #2B9939;
-}
-.search-box .search-input {
   display: flex;
   align-items: center;
-  height: 72rpx;
-  padding: 0 30rpx;
-  background: rgba(255, 255, 255, 0.9);
+  background-color: #fff;
   border-radius: 36rpx;
+  padding: 0 30rpx;
+  height: 72rpx;
+  margin: 20rpx 30rpx;
 }
-.search-box .search-input .icon-search {
-  font-size: 32rpx;
-  color: #666;
+.search-box .iconfont {
+  font-size: 36rpx;
+  color: #999;
   margin-right: 10rpx;
 }
-.search-box .search-input .placeholder {
+.search-box input {
+  flex: 1;
+  height: 100%;
   font-size: 28rpx;
+  color: #333;
+}
+.search-box input::-webkit-input-placeholder {
+  color: #999;
+}
+.search-box input::placeholder {
   color: #999;
 }
 .banner {

@@ -65,14 +65,38 @@
 			
 			<!-- 昵称输入 -->
 			<view class="input-group">
-				<text class="label">昵称</text>
+				<text class="label">用户名</text>
 				<view class="input-box">
 					<input 
 						type="text" 
-						v-model="nickname"
-						placeholder="请输入昵称"
+						v-model="username"
+						placeholder="请输入用户名"
 					/>
 				</view>
+			</view>
+			
+			<!-- 性别选择 -->
+			<view class="input-group">
+				<text class="label">性别</text>
+				<view class="gender-box">
+					<view 
+						class="gender-option" 
+						:class="{ active: gender === 1 }"
+						@click="selectGender(1)"
+					>
+						<text class="iconfont icon-male"></text>
+						<text>男</text>
+					</view>
+					<view 
+						class="gender-option" 
+						:class="{ active: gender === 2 }"
+						@click="selectGender(2)"
+					>
+						<text class="iconfont icon-female"></text>
+						<text>女</text>
+					</view>
+				</view>
+				<text class="tips">注意：性别选择后不可更改</text>
 			</view>
 		</view>
 		
@@ -116,7 +140,8 @@ export default {
 			phone: '',
 			code: '',
 			password: '',
-			nickname: '',
+			username: '',
+			gender: 0,
 			phoneError: '',
 			codeError: '',
 			passwordError: '',
@@ -136,7 +161,8 @@ export default {
 			return this.phone.length === 11 && 
 				this.code.length === 6 && 
 				this.password.length >= 6 &&
-				this.nickname &&
+				this.username &&
+				this.gender !== 0 &&
 				!this.phoneError && 
 				!this.codeError &&
 				!this.passwordError &&
@@ -208,6 +234,7 @@ export default {
 					})
 				}
 			} catch (e) {
+				console.error('发送验证码失败:', e)
 				uni.showToast({
 					title: '发送失败，请重试',
 					icon: 'none'
@@ -215,18 +242,31 @@ export default {
 			}
 		},
 		
+		// 选择性别
+		selectGender(value) {
+			this.gender = value
+		},
+		
 		// 注册
 		async register() {
 			if (!this.canSubmit) return
-			
+			console.log("注册的手机号：",this.phone	)
+			console.log("注册的验证码：",this.code)
+			console.log("注册的密码：",this.password)
+			console.log("注册的用户名：",this.username)
+			console.log("注册的性别：",this.gender)
 			try {
 				const res = await uniCloud.callFunction({
 					name: 'user-register',
+
 					data: {
 						phone: this.phone,
 						code: this.code,
 						password: this.password,
-						nickname: this.nickname
+						username: this.username,
+						gender: this.gender,
+						status: 1,
+						mobile_confirmed: 1
 					}
 				})
 				
@@ -235,9 +275,6 @@ export default {
 						title: '注册成功',
 						icon: 'success'
 					})
-					
-					// 保存token
-					uni.setStorageSync('token', res.result.token)
 					
 					// 返回上一页
 					setTimeout(() => {
@@ -250,6 +287,7 @@ export default {
 					})
 				}
 			} catch (e) {
+				console.error('注册失败:', e)
 				uni.showToast({
 					title: '注册失败，请重试',
 					icon: 'none'
@@ -427,5 +465,36 @@ export default {
 		color: #2B9939;
 		margin-left: 10rpx;
 	}
+}
+
+.gender-box {
+	display: flex;
+	justify-content: space-around;
+	padding: 20rpx 0;
+	
+	.gender-option {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 20rpx 40rpx;
+		border-radius: 12rpx;
+		background-color: #f5f5f5;
+		
+		&.active {
+			background-color: rgba(43, 153, 57, 0.1);
+			color: #2B9939;
+		}
+		
+		.iconfont {
+			font-size: 48rpx;
+			margin-bottom: 10rpx;
+		}
+	}
+}
+
+.tips {
+	font-size: 24rpx;
+	color: #999;
+	margin-top: 10rpx;
 }
 </style> 

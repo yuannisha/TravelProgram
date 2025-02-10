@@ -65,34 +65,17 @@
 export default {
 	data() {
 		return {
-			favoriteList: [
-				{
-					id: 1,
-					name: '西湖风景区',
-					imageUrl: '/static/spots/spot1.jpg',
-					rating: 4.9,
-					price: 80,
-					tags: ['5A景区', '湖泊', '游船'],
-					favoriteTime: '2024-02-08'
-				},
-				{
-					id: 2,
-					name: '故宫博物院',
-					imageUrl: '/static/spots/spot2.jpg',
-					rating: 4.8,
-					price: 60,
-					tags: ['5A景区', '古建筑', '文物'],
-					favoriteTime: '2024-02-07'
-				}
-			],
+			favoriteList: [],
 			page: 1,
+			pageSize: 10,
 			loading: false,
 			noMore: false,
 			isRefreshing: false
 		}
 	},
-	onLoad() {
-		this.getFavoriteList()
+	onShow() {
+		// 每次显示页面时刷新数据
+		this.refresh()
 	},
 	methods: {
 		// 获取收藏列表
@@ -100,16 +83,101 @@ export default {
 			if (this.loading || this.noMore) return
 			this.loading = true
 			
-			// 模拟接口请求
-			await new Promise(resolve => setTimeout(resolve, 1000))
-			
-			// TODO: 实际项目中这里需要调用后端接口
-			this.loading = false
-			
-			// 模拟没有更多数据
-			if (this.page > 2) {
-				this.noMore = true
+			try {
+				const uid = uni.getStorageSync('userInfo')
+				console.log("uid",uid)
+				const res = await uniCloud.callFunction({
+					name: 'get-favorites',
+					data: {
+						uid: uid.id,
+						page: this.page,
+						pageSize: this.pageSize
+					}
+				})
+				console.log("res",res)
+				if (res.result.code === 0) {
+					console.log("获取收藏列表成功",res)
+					const { list, total } = res.result.data
+					// 使用 Promise.all 处理异步操作
+					const promises = list.map(item => 
+						uniCloud.callFunction({
+							name: 'get-spot-withId',
+							data: {
+								id: item.spot_id
+							}
+						})
+					)
+					
+					const spotResults = await Promise.all(promises)
+					const favorites = spotResults.map(result => {
+						const spotData = result.result.data[0]
+						return {
+							id: spotData._id,
+							name: spotData.name,
+							imageUrl: spotData.imageUrl,
+							rating: spotData.rating,
+							price: spotData.price / 100,
+							tags: spotData.tags || []
+						}
+					})
+					
+					console.log("favorites", favorites)
+					
+					if (this.page === 1) {
+						this.favoriteList = favorites
+						console.log("this.favoriteList", this.favoriteList)
+					} else {
+						this.favoriteList = [...this.favoriteList, ...favorites]
+						console.log("this.favoriteList", this.favoriteList)
+					}
+					
+					this.noMore = this.favoriteList.length >= total
+				}
+			} catch (e) {
+				console.error('获取收藏列表失败:', e)
+				uni.showToast({
+					title: '获取收藏列表失败',
+					icon: 'none'
+				})
 			}
+			
+			this.loading = false
+		},
+		
+		// 取消收藏
+		async cancelFavorite(item, index) {
+			uni.showModal({
+				title: '提示',
+				content: '确定要取消收藏该景点吗？',
+				success: async res => {
+					if (res.confirm) {
+						try {
+							const uid = uni.getStorageSync('userInfo')
+							const res = await uniCloud.callFunction({
+								name: 'toggle-favorite',
+								data: {
+									spotId: item.id,
+									uid: uid.id
+								}
+							})
+
+							if (res.result.code === 0) {
+								this.favoriteList.splice(index, 1)
+								uni.showToast({
+									title: '已取消收藏',
+									icon: 'none'
+								})
+							}
+						} catch (e) {
+							console.error('取消收藏失败:', e)
+							uni.showToast({
+								title: '操作失败',
+								icon: 'none'
+							})
+						}
+					}
+				}
+			})
 		},
 		
 		// 下拉刷新
@@ -127,24 +195,6 @@ export default {
 				this.page++
 				this.getFavoriteList()
 			}
-		},
-		
-		// 取消收藏
-		cancelFavorite(item, index) {
-			uni.showModal({
-				title: '提示',
-				content: '确定要取消收藏该景点吗？',
-				success: res => {
-					if (res.confirm) {
-						// TODO: 调用取消收藏接口
-						this.favoriteList.splice(index, 1)
-						uni.showToast({
-							title: '已取消收藏',
-							icon: 'none'
-						})
-					}
-				}
-			})
 		},
 		
 		// 分享

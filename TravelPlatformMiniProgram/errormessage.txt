@@ -1,9 +1,7 @@
-15:34:34.884 [plugin:vite:css] [postcss] Could not resolve "@/static/fonts/iconfont.ttf" from "App.vue"
-15:34:34.884 at App.vue:438:3
-15:34:34.884     436 | @font-face {
-15:34:34.884     437 |   font-family: "iconfont";
-15:34:34.884   > 438 |   src: url("/static/fonts/iconfont.ttf") format("truetype");
-15:34:34.884         |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-15:34:34.884     439 | }
-15:34:34.884     440 | /* 全局样式 */
-15:34:34.884     441 | page {
+21:08:19.210 [本地调试]D:\programs2024to2025\ranjiangtaoprogram\first\TravelPlatformMiniProgram\uniCloud-aliyun\cloudfunctions\user-register\index.js:76
+21:08:19.210 [本地调试]			gender: gender,
+21:08:19.210 [本地调试]			^^^^^^
+21:08:19.210 [本地调试]
+21:08:19.210 [本地调试]SyntaxError: Unexpected identifier
+21:08:19.210 [本地调试]    at new Script (node:vm:99:7)
+21:08:19.210 [本地调试]    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

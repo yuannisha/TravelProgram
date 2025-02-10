@@ -5,83 +5,36 @@ const $ = db.command.aggregate
 
 exports.main = async (event, context) => {
 	const {
-		page = 1,
-		pageSize = 10
+		page = event.page || 1,
+		pageSize = event.pageSize || 10
 	} = event
 	
-	const uid = context.USERID
+
+	const uid = event.uid
 	if (!uid) {
 		return {
 			code: -1,
 			message: '请先登录'
 		}
 	}
-	
 	const collection = db.collection('travel-favorites')
-	
 	try {
-		// 构建聚合管道
-		const pipeline = [
-			{
-				$match: {
-					user_id: uid
-				}
-			},
-			{
-				$lookup: {
-					from: 'travel-spots',
-					localField: 'spot_id',
-					foreignField: '_id',
-					as: 'spot'
-				}
-			},
-			{
-				$unwind: {
-					path: '$spot',
-					preserveNullAndEmptyArrays: false
-				}
-			},
-			{
-				$sort: {
-					create_date: -1
-				}
-			},
-			{
-				$skip: (page - 1) * pageSize
-			},
-			{
-				$limit: pageSize
-			},
-			{
-				$project: {
-					_id: 1,
-					create_date: 1,
-					spot: {
-						_id: 1,
-						name: 1,
-						imageUrl: 1,
-						price: 1,
-						rating: 1,
-						tags: 1
-					}
-				}
-			}
-		]
-		
-		// 获取收藏列表
-		const listRes = await collection.aggregate(pipeline).end()
-		
-		// 获取总数
-		const totalRes = await collection.where({
+		// 获取和uid相关的收藏列表
+		const listRes = await collection.where({
 			user_id: uid
-		}).count()
+		}).orderBy('create_date', 'desc').skip((page - 1) * pageSize).limit(pageSize).get()	
+		console.log("listRes",listRes)
+
+		// 获取总数
+		const totalRes = listRes.data.length
+		console.log("totalRes",totalRes)
 		
 		return {
 			code: 0,
 			message: '获取成功',
 			data: {
 				list: listRes.data,
-				total: totalRes.total
+				total: totalRes
 			}
 		}
 	} catch (e) {

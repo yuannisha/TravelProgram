@@ -4,11 +4,18 @@
     "pages/spots/spots",
     "pages/map/map",
     "pages/user/user",
+    "pages/user/avatar",
+    "pages/user/profile",
+    "pages/user/change-password",
+    "pages/user/change-mobile",
     "pages/spots/detail",
     "pages/user/login",
     "pages/user/register",
     "pages/user/favorites",
-    "pages/spots/search"
+    "pages/spots/search",
+    "pages/user/settings",
+    "pages/user/about",
+    "pages/spots/comments"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -17,7 +24,7 @@
     "backgroundColor": "#F8F8F8"
   },
   "tabBar": {
-    "color": "#7A7E83",
+    "color": "#999999",
     "selectedColor": "#2B9939",
     "borderStyle": "black",
     "backgroundColor": "#FFFFFF",

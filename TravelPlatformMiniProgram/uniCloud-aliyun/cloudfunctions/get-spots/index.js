@@ -1,7 +1,6 @@
 'use strict';
 
 const db = uniCloud.database()
-const $ = db.command.aggregate
 const spotCollection = db.collection('travel-spots')
 
 exports.main = async (event, context) => {
@@ -14,94 +13,106 @@ exports.main = async (event, context) => {
 		sortOrder = 'desc', // 排序方式：desc-降序 asc-升序
 		longitude, // 经度
 		latitude // 纬度
+
 	} = event
 	
 	// 构建查询条件
-	const matchCondition = {}
+	const where = {}
 	
 	// 分类筛选
 	if (categoryId > 0) {
-		matchCondition.categoryId = categoryId
+		where.categoryId = categoryId
 	}
 	
 	// 关键词搜索
-	if (keyword) {
-		matchCondition.name = new RegExp(keyword, 'i')
+	if (keyword && keyword.trim()) {
+		const searchKeyword = keyword.trim()
+		console.log("搜索关键词", searchKeyword)
+		const dbCmd = db.command
+		where.$or = [
+			{ name:  { $regex: searchKeyword, $options: 'i' }  },
+			{ address:  { $regex: searchKeyword, $options: 'i' }  },
+			{ description:  { $regex: searchKeyword, $options: 'i' }  }
+		]
 	}
-	
-	// 构建聚合管道
-	const pipeline = [{
-		$match: matchCondition
-	}]
-	
-	// 如果提供了经纬度，计算距离
-	if (longitude && latitude) {
-		pipeline.push({
-			$geoNear: {
-				near: {
-					type: 'Point',
-					coordinates: [parseFloat(longitude), parseFloat(latitude)]
-				},
-				distanceField: 'distance',
-				spherical: true,
-				distanceMultiplier: 0.001 // 转换为公里
-			}
-		})
-	}
-	
-	// 添加排序
-	if (sortBy === 'rating') {
-		pipeline.push({
-			$sort: {
-				rating: sortOrder === 'desc' ? -1 : 1
-			}
-		})
-	} else if (sortBy === 'price') {
-		pipeline.push({
-			$sort: {
-				price: sortOrder === 'desc' ? -1 : 1
-			}
-		})
-	}
-	
-	// 分页
-	pipeline.push(
-		{
-			$skip: (page - 1) * pageSize
-		},
-		{
-			$limit: pageSize
-		}
-	)
-	
-	// 查询总数
-	const countPipeline = [{
-		$match: matchCondition
-	}, {
-		$count: 'total'
-	}]
-	
+	console.log("查询条件", where)
 	try {
-		// 并行执行查询
-		const [spots, countResult] = await Promise.all([
-			spotCollection.aggregate(pipeline).end(),
-			spotCollection.aggregate(countPipeline).end()
-		])
+		// 查询总数
+		const countResult = await spotCollection.where(where).count()
+
+		console.log("总数",countResult)
+
+		// 构建查询
+		let query = spotCollection.where(where)
 		
+		// 排序
+		if (sortBy === 'rating') {
+			query = query.orderBy('rating', sortOrder === 'desc' ? 'desc' : 'asc')
+		} else if (sortBy === 'price') {
+			query = query.orderBy('price', sortOrder === 'desc' ? 'desc' : 'asc')
+		}
+		
+		// 分页
+		query = query.skip((page - 1) * pageSize).limit(pageSize)
+		
+		// 执行查询
+		const result = await query.get()
+		console.log("查询结果", result)
+
+		// 如果有经纬度，计算距离
+		let spots = result.data
+		if (longitude && latitude) {
+			spots = spots.map(spot => {
+				if (spot.location && spot.location.coordinates) {
+					const [spotLong, spotLat] = spot.location.coordinates
+					const distance = calculateDistance(latitude, longitude, spotLat, spotLong)
+					return { ...spot, distance: parseFloat(distance.toFixed(1)) }
+				}
+				return { ...spot, distance: null }
+			})
+
+			// 如果是按距离排序，在内存中进行排序
+			if (sortBy === 'distance') {
+				spots.sort((a, b) => {
+					const distanceA = a.distance ?? Infinity
+					const distanceB = b.distance ?? Infinity
+					return sortOrder === 'asc' ? distanceA - distanceB : distanceB - distanceA
+				})
+			}
+		}
+
 		return {
 			code: 0,
 			message: 'success',
 			data: {
-				list: spots.data,
-				total: countResult.data[0] ? countResult.data[0].total : 0,
+				list: spots,
+				total: countResult.total,
 				page,
-				pageSize
+				pageSize,
+				hasRecommend: spots.length === 0 // 添加标记表示是否需要显示推荐
 			}
 		}
 	} catch (e) {
+		console.error('搜索错误:', e)
 		return {
 			code: -1,
 			message: e.message || '获取景点列表失败'
 		}
 	}
+}
+
+// 计算两点之间的距离（单位：公里）
+function calculateDistance(lat1, lon1, lat2, lon2) {
+	const R = 6371 // 地球半径（公里）
+	const dLat = toRad(lat2 - lat1)
+	const dLon = toRad(lon2 - lon1)
+	const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+		Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+		Math.sin(dLon / 2) * Math.sin(dLon / 2)
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+	return R * c
+}
+
+function toRad(value) {
+	return value * Math.PI / 180
 } 

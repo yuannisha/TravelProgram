@@ -14,8 +14,9 @@ exports.main = async (event, context) => {
 			message: '景点ID不能为空'
 		}
 	}
-	
-	const uid = context.USERID
+	console.log(context)
+	console.log(event)
+	const uid = event.uid
 	if (!uid) {
 		return {
 			code: -2,
@@ -45,9 +46,10 @@ exports.main = async (event, context) => {
 		// 如果未收藏，则添加收藏
 		await favoriteCollection.add({
 			user_id: uid,
-			spot_id: spotId
+			spot_id: spotId,
+			create_date: new Date()
 		})
-		
+
 		return {
 			code: 0,
 			message: '收藏成功',

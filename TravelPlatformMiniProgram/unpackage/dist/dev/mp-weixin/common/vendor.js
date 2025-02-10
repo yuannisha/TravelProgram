@@ -6806,7 +6806,7 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.110.107,127.0.0.1";
+  const hosts = "192.168.110.107,127.0.0.1,172.20.192.1";
   const port = "8090";
   const id = "mp-weixin_j1gxaR";
   const lazy = typeof swan !== "undefined";
@@ -7744,7 +7744,7 @@ const pages = [
   {
     path: "pages/index/index",
     style: {
-      navigationBarTitleText: "旅游平台",
+      navigationBarTitleText: "首页",
       enablePullDownRefresh: true
     }
   },
@@ -7765,6 +7765,30 @@ const pages = [
     path: "pages/user/user",
     style: {
       navigationBarTitleText: "我的"
+    }
+  },
+  {
+    path: "pages/user/avatar",
+    style: {
+      navigationBarTitleText: "头像"
+    }
+  },
+  {
+    path: "pages/user/profile",
+    style: {
+      navigationBarTitleText: "个人信息"
+    }
+  },
+  {
+    path: "pages/user/change-password",
+    style: {
+      navigationBarTitleText: "修改密码"
+    }
+  },
+  {
+    path: "pages/user/change-mobile",
+    style: {
+      navigationBarTitleText: "更换手机号"
     }
   },
   {
@@ -7797,6 +7821,28 @@ const pages = [
     style: {
       navigationBarTitleText: "搜索"
     }
+  },
+  {
+    path: "pages/user/settings",
+    style: {
+      navigationBarTitleText: "设置"
+    }
+  },
+  {
+    path: "pages/user/about",
+    style: {
+      navigationBarTitleText: "关于我们"
+    }
+  },
+  {
+    path: "pages/spots/comments",
+    style: {
+      navigationBarTitleText: "全部评论",
+      enablePullDownRefresh: false,
+      "app-plus": {
+        bounce: "none"
+      }
+    }
   }
 ];
 const globalStyle = {
@@ -7806,7 +7852,7 @@ const globalStyle = {
   backgroundColor: "#F8F8F8"
 };
 const tabBar = {
-  color: "#7A7E83",
+  color: "#999999",
   selectedColor: "#2B9939",
   borderStyle: "black",
   backgroundColor: "#FFFFFF",
@@ -8178,7 +8224,7 @@ class S {
 function T(e2) {
   return e2 && "string" == typeof e2 ? JSON.parse(e2) : e2;
 }
-const b = true, E = "mp-weixin", P = T(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), C = E, A = T('{"address":["127.0.0.1","192.168.110.107"],"servePort":7001,"debugPort":9001,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","E:/HBuilderX/HBuilderX.4.45.2025010502/HBuilderX/plugins/unicloud/**/*.js"]}'), O = T('[{"provider":"aliyun","spaceName":"uniserver","spaceId":"mp-61955188-4c98-45ca-a1f1-471cc333073c","clientSecret":"VN/xAUS8on0tOl/t6DrQbQ==","endpoint":"https://api.next.bspapp.com"}]') || [];
+const b = true, E = "mp-weixin", P = T(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), C = E, A = T('{"address":["127.0.0.1","192.168.110.107","172.20.192.1"],"servePort":7000,"debugPort":9000,"initialLaunchType":"remote","skipFiles":["<node_internals>/**","E:/HBuilderX/HBuilderX.4.45.2025010502/HBuilderX/plugins/unicloud/**/*.js"]}'), O = T('[{"provider":"aliyun","spaceName":"uniserver","spaceId":"mp-61955188-4c98-45ca-a1f1-471cc333073c","clientSecret":"VN/xAUS8on0tOl/t6DrQbQ==","endpoint":"https://api.next.bspapp.com"}]') || [];
 let N = "";
 try {
   N = "__UNI__11FC83E";
