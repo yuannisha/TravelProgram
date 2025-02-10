@@ -135,41 +135,48 @@ cd TravelPlatformMiniProgram
 
 ### 1. 景点数据 (travel-spots)
 ```js
-// 景点1：西湖
-{
-  "name": "西湖",
-  "categoryId": 1,
-  "imageUrl": "/static/spots/xihu.jpg",
-  "images": [
-    "/static/spots/xihu1.jpg",
-    "/static/spots/xihu2.jpg",
-    "/static/spots/xihu3.jpg"
-  ],
-  "price": 8000,
-  "rating": 4.8,
-  "commentCount": 256,
-  "tags": ["自然风光", "文化遗产", "摄影胜地"],
-  "address": "浙江省杭州市西湖区",
-  "location": {
-    "type": "Point",
-    "coordinates": [120.149953, 30.242846]
-  },
-  "description": "西湖，位于浙江省杭州市西湖区龙井路1号，是中国大陆首个世界遗产公园。",
-  "openTime": "全天开放",
-  "suggestedTime": "建议游玩3-4小时"
-}
+{"_id":{"$oid":"67a8b9843d029caca1cdcb17"},"name":"西湖","categoryId":1,"imageUrl":"/static/spots/xihu.jpg","images":["/static/spots/xihu1.jpg","/static/spots/xihu2.jpg","/static/spots/xihu3.jpg"],"price":8000,"rating":4.8,"commentCount":256,"tags":["自然风光","文化遗产","摄影胜地"],"address":"浙江省杭州市西湖区","location":{"type":"Point","coordinates":[120.149953,30.242846]},"description":"西湖，位于浙江省杭州市西湖区龙井路1号，是中国大陆首个世界遗产公园。","openTime":"全天开放","suggestedTime":"建议游玩3-4小时","creator_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"create_date":{"$date":"2025-02-09T13:15:52.567Z"},"update_date":{"$date":"2025-02-09T13:15:52.567Z"}}
+
+{"_id":{"$oid":"67a8badae0ec19c842bce11b"},"name":"上海迪士尼乐园","categoryId":4,"imageUrl":"/static/spots/disney.jpg","images":["/static/spots/disney1.jpg","/static/spots/disney2.jpg","/static/spots/disney3.jpg"],"price":68900,"rating":4.6,"commentCount":1526,"tags":["主题乐园","亲子游玩","娱乐项目"],"address":"上海市浦东新区川沙新镇黄赵路310号","location":{"type":"Point","coordinates":[121.674272,31.145279]},"description":"上海迪士尼度假区是中国内地首个迪士尼度假区。","openTime":"8:00-20:00","suggestedTime":"建议游玩1-2天","creator_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"create_date":{"$date":"2025-02-09T13:15:52.567Z"},"update_date":{"$date":"2025-02-09T13:15:52.567Z"}}
+
+{"_id":{"$oid":"67a8bae9466d41ded409dbc9"},"name":"宽窄巷子","categoryId":3,"imageUrl":"/static/spots/kuanzhai.jpg","images":["/static/spots/kuanzhai1.jpg","/static/spots/kuanzhai2.jpg","/static/spots/kuanzhai3.jpg"],"price":0,"rating":4,"commentCount":3,"tags":["美食街区","文化古迹","休闲娱乐"],"address":"四川省成都市青羊区宽窄巷子","location":{"type":"Point","coordinates":[104.062225,30.669996]},"description":"宽窄巷子是成都市三大历史文化名城保护街区之一。","openTime":"全天开放","suggestedTime":"建议游玩3-4小时","creator_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"create_date":{"$date":"2025-02-09T13:15:52.567Z"},"update_date":{"$date":"2025-02-09T13:15:52.567Z"}}
+
+{"_id":{"$oid":"67a8bca63d029caca1ce29a8"},"name":"故宫","categoryId":2,"imageUrl":"/static/spots/gugong.jpg","images":["/static/spots/gugong1.jpg","/static/spots/gugong2.jpg","/static/spots/gugong3.jpg"],"price":6000,"rating":4.9,"commentCount":528,"tags":["历史古迹","宫廷建筑","文化遗产"],"address":"北京市东城区景山前街4号","location":{"type":"Point","coordinates":[116.403414,39.924091]},"description":"故宫又名紫禁城，是中国明清两代的皇家宫殿。","openTime":"8:30-17:00","suggestedTime":"建议游玩4-6小时","creator_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"create_date":{"$date":"2025-02-09T13:15:52.567Z"},"update_date":{"$date":"2025-02-09T13:15:52.567Z"}}
+
+{"_id":{"$oid":"67a8bcbbce5ec9e5aaf864fb"},"name":"黄山","categoryId":1,"imageUrl":"/static/spots/huangshan.jpg","images":["/static/spots/huangshan1.jpg","/static/spots/huangshan2.jpg","/static/spots/huangshan3.jpg"],"price":19000,"rating":4,"commentCount":1,"tags":["自然风光","山水景观","云海日出"],"address":"安徽省黄山市黄山区","location":{"type":"Point","coordinates":[118.337481,30.131949]},"description":"黄山以奇松、怪石、云海、温泉四绝闻名于世。","openTime":"6:30-17:30","suggestedTime":"建议游玩2-3天","creator_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"create_date":{"$date":"2025-02-09T13:15:52.567Z"},"update_date":{"$date":"2025-02-09T13:15:52.567Z"}}
+
+{"_id":{"$oid":"67a8bcd5e0ec19c842bd2033"},"name":"八达岭长城","categoryId":2,"imageUrl":"/static/spots/changcheng.jpg","images":["/static/spots/changcheng1.jpg","/static/spots/changcheng2.jpg","/static/spots/changcheng3.jpg"],"price":4000,"rating":4.7,"commentCount":986,"tags":["历史古迹","文化遗产","登山徒步"],"address":"北京市延庆区八达岭长城路","location":{"type":"Point","coordinates":[116.016389,40.359167]},"description":"八达岭长城是明长城中最具代表性的一段。","openTime":"7:30-17:30(夏季) 7:30-17:00(冬季)","suggestedTime":"建议游玩3-4小时","creator_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"create_date":{"$date":"2025-02-09T13:15:52.567Z"},"update_date":{"$date":"2025-02-09T13:15:52.567Z"}}
+
 ```
 
 ### 2. 用户数据 (uni-id-users)
 ```js
-{
-  "username": "测试用户",
-  "password": "password123",
-  "gender": 1,
-  "mobile": "13800138000",
-  "avatar": "/static/avatar/default-avatar.png"
-}
+{"_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"password":"123456","username":"222","gender":1,"status":1,"mobile":"13312345678","mobile_confirmed":1,"avatar":"https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/cd114ae8-6125-4076-af87-27d6c2152122.jpg","token":"MTMzMTIzNDU2NzgtMTczOTIxMjY3Mzc3Ng==","register_date":{"$date":"2025-02-09T13:15:52.567Z"},"last_login_date":{"$date":"2025-02-10T18:37:53.776Z"}}
+{"_id":{"$oid":"67a8b5b0bd02205f7b2bcba2"},"password":"111111","username":"用户二","gender":2,"status":1,"mobile":"13912345678","mobile_confirmed":1,"avatar":"https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/6bcb1ae2-5969-4901-9dec-a3f59b650587.jpg","token":"MTM5MTIzNDU2NzgtMTczOTIxNjUzMDU5Mg==","register_date":{"$date":"2025-02-09T14:03:27.08Z"},"last_login_date":{"$date":"2025-02-10T19:42:10.593Z"}}
+{"_id":{"$oid":"67a8b83821821b610dc7a845"},"password":"123456","username":"用户三","gender":2,"status":1,"mobile":"13812345678","mobile_confirmed":1,"avatar":"/static/avatar/default-avatar.png","token":"MTM4MTIzNDU2NzgtMTczOTIxMjk3Mjk4OQ==","register_date":{"$date":"2025-02-09T14:14:14.335Z"},"last_login_date":{"$date":"2025-02-10T18:42:52.989Z"}}
+
 ```
+
+### 3. 评论数据 (travel-comments)
+```js
+{"_id":{"$oid":"67aa034e149854207f5e9850"},"user_id":{"$oid":"67a8b5b0bd02205f7b2bcba2"},"spot_id":{"$oid":"67a8bae9466d41ded409dbc9"},"content":"111111111111","rating":4.1,"images":["https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/a8dcfa86-62a7-4896-8e8c-8381dadbace8.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/9fbb2a8f-e63a-480c-8342-6b8fb443a82a.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/f9bb39db-e04d-4af1-a396-f10c6aa57fd7.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/6c679398-c79a-4a57-9873-ca555e4ed96c.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/6926819f-83ac-4fd7-b0b3-a577aa45a295.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/9adf87cb-c20a-4bb6-bd2d-c6e83740c935.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/fa204392-6e63-45ee-9756-6a1327a358b7.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/71f5658e-837c-4735-b2cf-e3e70538aae0.jpg","https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/0c514bf8-8065-45e9-84fe-7db00f760a5a.jpg"],"create_date":1739195212734,"update_date":1739195212734}
+
+{"_id":{"$oid":"67aa3dde466d41ded432869e"},"user_id":{"$oid":"67a8b5b0bd02205f7b2bcba2"},"spot_id":{"$oid":"67a8bcbbce5ec9e5aaf864fb"},"content":"哈哈哈哈哈","rating":4,"images":["https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/7f9f499b-765b-4213-8a6a-14bef8a5c635.jpg"],"create_date":1739210206594,"update_date":1739210206594}
+
+{"_id":{"$oid":"67aa47a6466d41ded43308ba"},"user_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"spot_id":{"$oid":"67a8bae9466d41ded409dbc9"},"content":"快快快快快快快快快","rating":4.6,"images":["https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/3be3b6a8-d054-4a7a-af6c-89c4c00af3c8.jpg"],"create_date":1739212708291,"update_date":1739212708291}
+
+{"_id":{"$oid":"67aa47f9466d41ded4330c2f"},"user_id":{"$oid":"67a8b83821821b610dc7a845"},"spot_id":{"$oid":"67a8bae9466d41ded409dbc9"},"content":"天天吞吞吐吐","rating":3.4,"images":["https://mp-61955188-4c98-45ca-a1f1-471cc333073c.cdn.bspapp.com/cloudstorage/c0027000-afdb-4091-9b6b-f32bd5cbbb57.jpg"],"create_date":1739212791200,"update_date":1739212791200}
+
+```   
+
+### 4. 喜欢数据 (travel-favorites)
+```js
+{"_id":{"$oid":"67a9fdeb337a9f4a9f694689"},"user_id":{"$oid":"67a8b5b0bd02205f7b2bcba2"},"spot_id":{"$oid":"67a8bcbbce5ec9e5aaf864fb"},"create_date":{"$date":"2025-02-10T13:23:54.239Z"}}
+
+{"_id":{"$oid":"67aa06616523418be840b4d5"},"user_id":{"$oid":"67a8aa8a0d2b3168f7518cc4"},"spot_id":{"$oid":"67a8bae9466d41ded409dbc9"},"create_date":{"$date":"2025-02-10T13:59:59.907Z"}}
+```
+
+
 
 ## 📅 更新日志
 
