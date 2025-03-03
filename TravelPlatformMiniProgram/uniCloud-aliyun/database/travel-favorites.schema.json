@@ -1,6 +1,6 @@
 {
 	"bsonType": "object",
-	"required": ["user_id", "spot_id"],
+	"required": ["user_id"],
 	"permission": {
 		"read": "auth.uid != null",
 		"create": "auth.uid != null",
@@ -22,6 +22,16 @@
 			"bsonType": "string",
 			"description": "景点ID",
 			"foreignKey": "travel-spots._id"
+		},
+		"plan_id": {
+			"bsonType": "string",
+			"description": "旅行计划ID",
+			"foreignKey": "travel-plans._id"
+		},
+		"type": {
+			"bsonType": "string",
+			"description": "收藏类型",
+			"forceDefaultValue": "spot"
 		},
 		"create_date": {
 			"bsonType": "timestamp",

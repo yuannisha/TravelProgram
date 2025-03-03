@@ -32,6 +32,13 @@
 					</view>
 					<text class="iconfont icon-arrow-right"></text>
 				</view>
+				<view class="menu-item" @click="goToPlans">
+					<view class="left">
+						<text class="iconfont icon-calendar"></text>
+						<text class="title">我的旅行计划</text>
+					</view>
+					<text class="iconfont icon-arrow-right"></text>
+				</view>
 			</view>
 			
 			<view class="menu-group">
@@ -70,8 +77,15 @@ export default {
 		}
 	},
 	onShow() {
+		const app = getApp();
+		app.globalData.checkLoginStatus(true); 
 		// 检查登录状态
 		this.checkLoginStatus()
+	},
+	onLoad() {
+		// 页面加载时检查登录状态
+		const app = getApp();
+		app.globalData.checkLoginStatus(true); 
 	},
 	methods: {
 		// 检查登录状态
@@ -117,6 +131,16 @@ export default {
 			})
 		},
 		
+		// 跳转到旅行计划页
+		goToPlans() {
+			if (!this.isLogin) {
+				this.goToLogin()
+				return
+			}
+			uni.navigateTo({
+				url: '/pages/plans/plans'
+			})
+		},
 		
 		// 跳转到设置页
 		goToSettings() {

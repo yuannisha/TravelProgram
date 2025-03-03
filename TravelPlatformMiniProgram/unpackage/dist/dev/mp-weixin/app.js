@@ -18,6 +18,11 @@ if (!Math) {
   "./pages/user/settings.js";
   "./pages/user/about.js";
   "./pages/spots/comments.js";
+  "./pages/plans/plans.js";
+  "./pages/plans/plan-edit.js";
+  "./pages/plans/plan-detail.js";
+  "./pages/plans/public-plans.js";
+  "./pages/plans/spot-select.js";
 }
 const _sfc_main = {
   onLaunch: function() {
@@ -30,15 +35,50 @@ const _sfc_main = {
         });
       }
     });
+    this.globalData.checkLoginStatus(false);
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:16", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:19", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:19", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:22", "App Hide");
   },
   onError: function(err) {
-    common_vendor.index.__f__("error", "at App.vue:22", "App Error:", err);
+    common_vendor.index.__f__("error", "at App.vue:25", "App Error:", err);
+  },
+  // 全局方法
+  globalData: {
+    /**
+     * 检查登录状态
+     * @param {Boolean} redirect 是否重定向到登录页
+     * @returns {Boolean} 是否已登录
+     */
+    checkLoginStatus: function(redirect = true) {
+      const token = common_vendor.index.getStorageSync("token");
+      const isLogin = !!token;
+      if (!isLogin && redirect) {
+        const pages = getCurrentPages();
+        const currentPage = pages[pages.length - 1];
+        const currentRoute = currentPage ? currentPage.route : "";
+        common_vendor.index.__f__("log", "at App.vue:45", "当前页面路径:", currentRoute);
+        if (currentRoute && !currentRoute.includes("/pages/user/login")) {
+          common_vendor.index.setStorageSync("loginRedirect", "/" + currentRoute);
+        }
+        common_vendor.index.navigateTo({
+          url: "/pages/user/login"
+        });
+      }
+      return isLogin;
+    },
+    /**
+     * 获取当前用户ID
+     * @returns {String} 用户ID
+     */
+    getUserId: function() {
+      const userInfo = common_vendor.index.getStorageSync("userInfo");
+      common_vendor.index.__f__("log", "at App.vue:67", "获取当前用户ID", userInfo);
+      return userInfo ? userInfo.id : "";
+    }
   }
 };
 function createApp() {

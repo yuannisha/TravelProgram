@@ -28,7 +28,6 @@ exports.main = async (event, context) => {
 	if (keyword && keyword.trim()) {
 		const searchKeyword = keyword.trim()
 		console.log("搜索关键词", searchKeyword)
-		const dbCmd = db.command
 		where.$or = [
 			{ name:  { $regex: searchKeyword, $options: 'i' }  },
 			{ address:  { $regex: searchKeyword, $options: 'i' }  },

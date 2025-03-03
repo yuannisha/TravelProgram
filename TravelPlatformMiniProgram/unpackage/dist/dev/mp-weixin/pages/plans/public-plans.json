@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "旅行灵感",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}

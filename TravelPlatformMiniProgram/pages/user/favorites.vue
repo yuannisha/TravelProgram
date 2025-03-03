@@ -1,10 +1,28 @@
 <template>
 	<view class="container">
+		<!-- 分类切换 -->
+		<view class="tab-bar">
+			<view 
+				class="tab-item" 
+				:class="{ active: activeTab === 'spot' }"
+				@click="switchTab('spot')"
+			>
+				景点收藏
+			</view>
+			<view 
+				class="tab-item" 
+				:class="{ active: activeTab === 'plan' }"
+				@click="switchTab('plan')"
+			>
+				计划收藏
+			</view>
+		</view>
+
 		<!-- 空状态 -->
 		<view class="empty" v-if="favoriteList.length === 0">
 			<image src="/static/empty/no-favorites.png" mode="aspectFit"></image>
-			<text>暂无收藏的景点</text>
-			<button class="go-btn" @click="goToSpots">去发现景点</button>
+			<text>暂无{{activeTab === 'spot' ? '收藏的景点' : '收藏的旅行计划'}}</text>
+			<button class="go-btn" @click="goToList">{{activeTab === 'spot' ? '去发现景点' : '去发现旅行计划'}}</button>
 		</view>
 		
 		<!-- 收藏列表 -->
@@ -17,34 +35,105 @@
 			:refresher-triggered="isRefreshing"
 			@refresherrefresh="refresh"
 		>
-			<view class="favorite-item" v-for="(item, index) in favoriteList" :key="index">
-				<view class="content" @click="goToSpotDetail(item.id)">
-					<image class="spot-image" :src="item.imageUrl" mode="aspectFill"></image>
-					<view class="info">
-						<view class="name-box">
-							<text class="name">{{item.name}}</text>
-							<text class="time">{{item.favoriteTime}}</text>
-						</view>
-						<view class="rating">
-							<text class="score">{{item.rating}}分</text>
-							<text class="price">¥{{item.price}}起</text>
-						</view>
-						<view class="tag-list">
-							<text class="tag" v-for="(tag, tagIndex) in item.tags" :key="tagIndex">{{tag}}</text>
+			<!-- 景点列表 -->
+			<template v-if="activeTab === 'spot'">
+				<view class="spot-favorite-item" v-for="(item, index) in favoriteList" :key="index">
+					<view class="content" @click="goToDetail(item)">
+						<image class="spot-image" :src="item.detail.imageUrl" mode="aspectFill"></image>
+						<view class="info">
+							<view class="name-box">
+								<text class="name">{{item.detail.name}}</text>
+								<view class="rating">
+									<uni-icons type="star-filled" size="14" color="#ff9500"></uni-icons>
+									<text class="score">{{item.detail.rating}}分</text>
+								</view>
+							</view>
+							
+							<view class="location" v-if="item.detail.address">
+								<uni-icons type="location" size="14" color="#666"></uni-icons>
+								<text class="address">{{item.detail.address}}</text>
+							</view>
+							
+							<view class="tag-list" v-if="item.detail.tags && item.detail.tags.length > 0">
+								<text class="tag" v-for="(tag, tagIndex) in item.detail.tags" :key="tagIndex">{{tag}}</text>
+							</view>
+							
+							<view class="bottom-info">
+								<view class="price">
+									<text class="price-label">门票</text>
+									<text class="price-value">¥{{item.detail.price / 100}}起</text>
+								</view>
+								<text class="time">收藏于 {{formatDate(item.create_date)}}</text>
+							</view>
 						</view>
 					</view>
+					<view class="action-box">
+						<button class="action-btn" @click="cancelFavorite(item, index)">
+							<uni-icons type="trash" size="16" color="#666"></uni-icons>
+							<text>取消收藏</text>
+						</button>
+						<button class="action-btn" @click="share(item)">
+							<uni-icons type="redo" size="16" color="#666"></uni-icons>
+							<text>分享</text>
+						</button>
+					</view>
 				</view>
-				<view class="action-box">
-					<button class="action-btn" @click="cancelFavorite(item, index)">
-						<text class="iconfont icon-delete"></text>
-						<text>取消收藏</text>
-					</button>
-					<button class="action-btn" @click="share(item)">
-						<text class="iconfont icon-share"></text>
-						<text>分享</text>
-					</button>
+			</template>
+
+			<!-- 旅行计划列表 -->
+			<template v-else>
+				<view class="plan-favorite-item" v-for="(item, index) in favoriteList" :key="index">
+					<view class="content" @click="goToDetail(item)">
+						<!-- 用户信息 -->
+						<view class="user-info">
+							<image 
+								:src="item.detail.user_info?.avatar || '/static/default-avatar.png'" 
+								mode="aspectFill" 
+								class="avatar"
+							></image>
+							<text class="username">{{ item.detail.user_info?.username || '用户' }}</text>
+							<text class="time">{{ formatDate(item.create_date) }}</text>
+						</view>
+						
+						<!-- 计划标题和状态 -->
+						<view class="plan-header">
+							<text class="plan-title">{{ item.detail.title }}</text>
+							<text :class="['status-tag', getStatusClass(item.detail.status)]">
+								{{ getStatusText(item.detail.status) }}
+							</text>
+						</view>
+						
+						<!-- 计划日期 -->
+						<view class="plan-dates">
+							<uni-icons type="calendar" size="16" color="#666"></uni-icons>
+							<text>{{ formatDate(item.detail.start_date) }} - {{ formatDate(item.detail.end_date) }}</text>
+						</view>
+						
+						<!-- 计划描述 -->
+						<view class="plan-description" v-if="item.detail.description">
+							{{ item.detail.description }}
+						</view>
+						
+						<!-- 景点统计 -->
+						<view class="plan-stats" v-if="item.detail.spots && item.detail.spots.length > 0">
+							<uni-icons type="location" size="16" color="#666"></uni-icons>
+							<text>{{ item.detail.spots.length }}个景点</text>
+							<text class="duration">{{ getDuration(item.detail.start_date, item.detail.end_date) }}天行程</text>
+						</view>
+					</view>
+					
+					<view class="action-box">
+						<button class="action-btn" @click="cancelFavorite(item, index)">
+							<uni-icons type="trash" size="16" color="#666"></uni-icons>
+							<text>取消收藏</text>
+						</button>
+						<button class="action-btn" @click="share(item)">
+							<uni-icons type="redo" size="16" color="#666"></uni-icons>
+							<text>分享</text>
+						</button>
+					</view>
 				</view>
-			</view>
+			</template>
 			
 			<!-- 加载更多 -->
 			<view class="loading" v-if="loading">
@@ -60,11 +149,12 @@
 <script>
 /**
  * 收藏页面
- * @description 展示用户收藏的景点列表
+ * @description 展示用户收藏的景点和旅行计划列表
  */
 export default {
 	data() {
 		return {
+			activeTab: 'spot', // 当前激活的标签：spot或plan
 			favoriteList: [],
 			page: 1,
 			pageSize: 10,
@@ -78,6 +168,14 @@ export default {
 		this.refresh()
 	},
 	methods: {
+		// 切换标签
+		switchTab(tab) {
+			if (this.activeTab !== tab) {
+				this.activeTab = tab
+				this.refresh()
+			}
+		},
+		
 		// 获取收藏列表
 		async getFavoriteList() {
 			if (this.loading || this.noMore) return
@@ -85,50 +183,25 @@ export default {
 			
 			try {
 				const uid = uni.getStorageSync('userInfo')
-				console.log("uid",uid)
 				const res = await uniCloud.callFunction({
 					name: 'get-favorites',
 					data: {
 						uid: uid.id,
 						page: this.page,
-						pageSize: this.pageSize
+						pageSize: this.pageSize,
+						type: this.activeTab
 					}
 				})
-				console.log("res",res)
+				
 				if (res.result.code === 0) {
-					console.log("获取收藏列表成功",res)
 					const { list, total } = res.result.data
-					// 使用 Promise.all 处理异步操作
-					const promises = list.map(item => 
-						uniCloud.callFunction({
-							name: 'get-spot-withId',
-							data: {
-								id: item.spot_id
-							}
-						})
-					)
-					
-					const spotResults = await Promise.all(promises)
-					const favorites = spotResults.map(result => {
-						const spotData = result.result.data[0]
-						return {
-							id: spotData._id,
-							name: spotData.name,
-							imageUrl: spotData.imageUrl,
-							rating: spotData.rating,
-							price: spotData.price / 100,
-							tags: spotData.tags || []
-						}
-					})
-					
-					console.log("favorites", favorites)
 					
 					if (this.page === 1) {
-						this.favoriteList = favorites
-						console.log("this.favoriteList", this.favoriteList)
+						this.favoriteList = list
+						console.log("this.favoriteList",this.favoriteList)
 					} else {
-						this.favoriteList = [...this.favoriteList, ...favorites]
-						console.log("this.favoriteList", this.favoriteList)
+						this.favoriteList = [...this.favoriteList, ...list]
+						console.log("this.favoriteList",this.favoriteList)
 					}
 					
 					this.noMore = this.favoriteList.length >= total
@@ -148,7 +221,7 @@ export default {
 		async cancelFavorite(item, index) {
 			uni.showModal({
 				title: '提示',
-				content: '确定要取消收藏该景点吗？',
+				content: `确定要取消收藏该${this.activeTab === 'spot' ? '景点' : '旅行计划'}吗？`,
 				success: async res => {
 					if (res.confirm) {
 						try {
@@ -156,7 +229,11 @@ export default {
 							const res = await uniCloud.callFunction({
 								name: 'toggle-favorite',
 								data: {
-									spotId: item.id,
+									type: this.activeTab,
+									...(this.activeTab === 'spot' 
+										? { spotId: item.detail._id }
+										: { planId: item.detail._id }
+									),
 									uid: uid.id
 								}
 							})
@@ -205,8 +282,11 @@ export default {
 					if (res.tapIndex === 0) {
 						// TODO: 调用微信分享
 					} else {
+						const path = this.activeTab === 'spot' 
+							? `/pages/spots/detail?id=${item.detail._id}`
+							: `/pages/plans/plan-detail?id=${item.detail._id}`
 						uni.setClipboardData({
-							data: `https://example.com/spots/${item.id}`,
+							data: `https://example.com${path}`,
 							success: () => {
 								uni.showToast({
 									title: '链接已复制',
@@ -219,18 +299,62 @@ export default {
 			})
 		},
 		
-		// 跳转到景点详情
-		goToSpotDetail(id) {
+		// 跳转到详情页
+		goToDetail(item) {
+			const path = this.activeTab === 'spot' 
+				? `/pages/spots/detail?id=${item.detail._id}`
+				: `/pages/plans/plan-detail?id=${item.detail._id}`
 			uni.navigateTo({
-				url: `/pages/spots/detail?id=${id}`
+				url: path
 			})
 		},
 		
-		// 跳转到景点列表
-		goToSpots() {
-			uni.switchTab({
-				url: '/pages/spots/spots'
-			})
+		// 跳转到列表页
+		goToList() {
+			if (this.activeTab === 'spot') {
+				uni.switchTab({
+					url: '/pages/spots/spots'
+				})
+			} else {
+				uni.switchTab({
+					url: '/pages/plans/public-plans'
+				})
+			}
+		},
+		
+		// 格式化日期
+		formatDate(timestamp) {
+			const date = new Date(timestamp)
+			return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+		},
+		
+		// 获取状态文本
+		getStatusText(status) {
+			const statusMap = {
+				0: '计划中',
+				1: '进行中',
+				2: '已完成'
+			}
+			return statusMap[status] || '未知'
+		},
+		
+		// 获取状态样式类
+		getStatusClass(status) {
+			const statusMap = {
+				0: 'status-planned',
+				1: 'status-ongoing',
+				2: 'status-completed'
+			}
+			return statusMap[status] || ''
+		},
+		
+		// 获取持续时间
+		getDuration(startDate, endDate) {
+			const start = new Date(startDate)
+			const end = new Date(endDate)
+			const diffTime = Math.abs(end - start)
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+			return diffDays
 		}
 	}
 }
@@ -242,6 +366,41 @@ export default {
 	background-color: #f5f5f5;
 }
 
+.tab-bar {
+	display: flex;
+	background-color: #fff;
+	padding: 20rpx 0;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	
+	.tab-item {
+		flex: 1;
+		text-align: center;
+		font-size: 28rpx;
+		color: #666;
+		position: relative;
+		padding: 20rpx 0;
+		
+		&.active {
+			color: #2979ff;
+			font-weight: bold;
+			
+			&::after {
+				content: '';
+				position: absolute;
+				bottom: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 40rpx;
+				height: 4rpx;
+				background-color: #2979ff;
+				border-radius: 2rpx;
+			}
+		}
+	}
+}
+
 .empty {
 	display: flex;
 	flex-direction: column;
@@ -249,8 +408,8 @@ export default {
 	padding-top: 200rpx;
 	
 	image {
-		width: 300rpx;
-		height: 300rpx;
+		width: 400rpx;
+		height: 400rpx;
 		margin-bottom: 40rpx;
 	}
 	
@@ -265,133 +424,321 @@ export default {
 		height: 80rpx;
 		line-height: 80rpx;
 		text-align: center;
-		background-color: #2B9939;
+		background-color: #2979ff;
 		color: #fff;
-		font-size: 28rpx;
 		border-radius: 40rpx;
-		
-		&::after {
-			border: none;
-		}
+		font-size: 28rpx;
 	}
 }
 
 .favorite-list {
-	padding: 20rpx;
+	height: calc(100vh - 88rpx);
+}
+
+.spot-favorite-item {
+	background-color: #fff;
+	margin: 20rpx;
+	border-radius: 12rpx;
+	overflow: hidden;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
 	
-	.favorite-item {
-		margin-bottom: 20rpx;
-		background-color: #fff;
-		border-radius: 12rpx;
-		overflow: hidden;
+	.content {
+		padding: 0;
+	}
+	
+	.spot-image {
+		width: 100%;
+		height: 360rpx;
+		border-radius: 12rpx 12rpx 0 0;
+	}
+	
+	.info {
+		padding: 24rpx;
+	}
+	
+	.name-box {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16rpx;
 		
-		.content {
+		.name {
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333;
+			flex: 1;
+			margin-right: 20rpx;
+		}
+		
+		.rating {
 			display: flex;
-			padding: 20rpx;
+			align-items: center;
 			
-			.spot-image {
-				width: 200rpx;
-				height: 200rpx;
-				border-radius: 8rpx;
-				margin-right: 20rpx;
+			.score {
+				font-size: 26rpx;
+				color: #ff9500;
+				margin-left: 6rpx;
+				font-weight: bold;
+			}
+		}
+	}
+	
+	.location {
+		display: flex;
+		align-items: center;
+		margin-bottom: 16rpx;
+		
+		.address {
+			font-size: 26rpx;
+			color: #666;
+			margin-left: 8rpx;
+			@include text-ellipsis;
+		}
+	}
+	
+	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
+		margin-bottom: 16rpx;
+		
+		.tag {
+			font-size: 24rpx;
+			color: #2979ff;
+			background-color: rgba(41, 121, 255, 0.1);
+			padding: 4rpx 16rpx;
+			border-radius: 20rpx;
+			margin-right: 16rpx;
+			margin-bottom: 12rpx;
+		}
+	}
+	
+	.bottom-info {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		
+		.price {
+			display: flex;
+			align-items: baseline;
+			
+			.price-label {
+				font-size: 24rpx;
+				color: #666;
+				margin-right: 8rpx;
 			}
 			
-			.info {
-				flex: 1;
-				display: flex;
-				flex-direction: column;
-				justify-content: space-between;
-				
-				.name-box {
-					display: flex;
-					justify-content: space-between;
-					align-items: center;
-					margin-bottom: 10rpx;
-					
-					.name {
-						font-size: 32rpx;
-						color: #333;
-						font-weight: bold;
-					}
-					
-					.time {
-						font-size: 24rpx;
-						color: #999;
-					}
-				}
-				
-				.rating {
-					margin-bottom: 10rpx;
-					
-					.score {
-						font-size: 28rpx;
-						color: #FF9500;
-						font-weight: bold;
-						margin-right: 20rpx;
-					}
-					
-					.price {
-						font-size: 28rpx;
-						color: #FF5B05;
-						font-weight: bold;
-					}
-				}
-				
-				.tag-list {
-					.tag {
-						display: inline-block;
-						padding: 4rpx 12rpx;
-						margin-right: 12rpx;
-						font-size: 22rpx;
-						color: #2B9939;
-						background-color: rgba(43, 153, 57, 0.1);
-						border-radius: 4rpx;
-					}
-				}
+			.price-value {
+				font-size: 32rpx;
+				color: #ff5a5f;
+				font-weight: bold;
 			}
 		}
 		
-		.action-box {
+		.time {
+			font-size: 24rpx;
+			color: #999;
+		}
+	}
+	
+	.action-box {
+		display: flex;
+		border-top: 2rpx solid #f5f5f5;
+		
+		.action-btn {
+			flex: 1;
+			height: 80rpx;
 			display: flex;
 			align-items: center;
-			justify-content: flex-end;
-			padding: 20rpx;
-			border-top: 1rpx solid #eee;
+			justify-content: center;
+			font-size: 28rpx;
+			color: #666;
+			background-color: #fff;
 			
-			.action-btn {
-				display: flex;
-				align-items: center;
-				margin-left: 30rpx;
-				background: none;
-				padding: 0;
-				line-height: 1;
-				
-				&::after {
-					border: none;
-				}
-				
-				.iconfont {
-					font-size: 32rpx;
-					color: #666;
-					margin-right: 4rpx;
-				}
-				
-				text {
-					font-size: 28rpx;
-					color: #666;
-				}
+			&:first-child {
+				border-right: 2rpx solid #f5f5f5;
+			}
+			
+			.uni-icons {
+				margin-right: 8rpx;
+			}
+			
+			&:active {
+				background-color: #f8f8f8;
+			}
+		}
+	}
+}
+
+.plan-favorite-item {
+	background-color: #fff;
+	margin: 20rpx;
+	border-radius: 12rpx;
+	overflow: hidden;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+	
+	.content {
+		padding: 0;
+	}
+	
+	.user-info {
+		display: flex;
+		align-items: center;
+		padding: 24rpx;
+		
+		.avatar {
+			width: 40rpx;
+			height: 40rpx;
+			border-radius: 50%;
+			margin-right: 16rpx;
+		}
+		
+		.username {
+			font-size: 28rpx;
+			font-weight: bold;
+			color: #333;
+		}
+		
+		.time {
+			font-size: 24rpx;
+			color: #999;
+		}
+	}
+	
+	.plan-header {
+		padding: 24rpx;
+		border-bottom: 2rpx solid #f5f5f5;
+		
+		.plan-title {
+			font-size: 32rpx;
+			font-weight: bold;
+			color: #333;
+		}
+		
+		.status-tag {
+			display: inline-block;
+			font-size: 24rpx;
+			padding: 4rpx 16rpx;
+			border-radius: 20rpx;
+			margin-left: 16rpx;
+			
+			&.status-planned {
+				color: #2979ff;
+				background-color: rgba(41, 121, 255, 0.1);
+			}
+			
+			&.status-ongoing {
+				color: #ff9500;
+				background-color: rgba(255, 149, 0, 0.1);
+			}
+			
+			&.status-completed {
+				color: #52c41a;
+				background-color: rgba(82, 196, 26, 0.1);
+			}
+		}
+	}
+	
+	.plan-dates {
+		padding: 24rpx;
+		border-bottom: 2rpx solid #f5f5f5;
+		
+		.uni-icons {
+			margin-right: 8rpx;
+		}
+		
+		text {
+			font-size: 24rpx;
+			color: #666;
+		}
+	}
+	
+	.plan-description {
+		padding: 24rpx;
+		font-size: 28rpx;
+		color: #666;
+	}
+	
+	.plan-stats {
+		padding: 24rpx;
+		border-top: 2rpx solid #f5f5f5;
+		
+		.uni-icons {
+			margin-right: 8rpx;
+		}
+		
+		text {
+			font-size: 24rpx;
+			color: #666;
+		}
+		
+		.duration {
+			font-size: 24rpx;
+			color: #999;
+		}
+	}
+	
+	.action-box {
+		display: flex;
+		border-top: 2rpx solid #f5f5f5;
+		
+		.action-btn {
+			flex: 1;
+			height: 80rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 28rpx;
+			color: #666;
+			background-color: #fff;
+			
+			&:first-child {
+				border-right: 2rpx solid #f5f5f5;
+			}
+			
+			.uni-icons {
+				margin-right: 8rpx;
+			}
+			
+			&:active {
+				background-color: #f8f8f8;
 			}
 		}
 	}
 }
 
 .loading, .no-more {
-	padding: 30rpx;
 	text-align: center;
+	padding: 30rpx;
+	color: #999;
+	font-size: 24rpx;
+}
+
+.status-tag {
+	display: inline-block;
+	font-size: 24rpx;
+	padding: 4rpx 16rpx;
+	border-radius: 20rpx;
 	
-	text {
-		font-size: 24rpx;
-		color: #999;
+	&.status-planned {
+		color: #2979ff;
+		background-color: rgba(41, 121, 255, 0.1);
 	}
+	
+	&.status-ongoing {
+		color: #ff9500;
+		background-color: rgba(255, 149, 0, 0.1);
+	}
+	
+	&.status-completed {
+		color: #52c41a;
+		background-color: rgba(82, 196, 26, 0.1);
+	}
+}
+
+// 添加文本省略的mixin
+@mixin text-ellipsis {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 </style> 

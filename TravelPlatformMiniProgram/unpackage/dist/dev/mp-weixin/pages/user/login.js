@@ -81,9 +81,14 @@ const _sfc_main = {
             icon: "success"
           });
           setTimeout(() => {
-            common_vendor.index.switchTab({
-              url: "/pages/user/user"
-            });
+            const pages = getCurrentPages();
+            if (pages.length > 1) {
+              common_vendor.index.navigateBack();
+            } else {
+              common_vendor.index.switchTab({
+                url: "/pages/index/index"
+              });
+            }
           }, 1500);
         } else {
           common_vendor.index.showToast({
@@ -92,7 +97,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/user/login.vue:201", "登录失败:", e);
+        common_vendor.index.__f__("error", "at pages/user/login.vue:206", "登录失败:", e);
         common_vendor.index.showToast({
           title: "登录失败，请重试",
           icon: "none"

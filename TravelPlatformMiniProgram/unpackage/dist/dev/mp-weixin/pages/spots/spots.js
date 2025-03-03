@@ -21,8 +21,14 @@ const _sfc_main = {
       latitude: null
     };
   },
+  onShow() {
+    const app = getApp();
+    app.globalData.checkLoginStatus(true);
+  },
   onLoad() {
     this.getCurrentLocation();
+    const app = getApp();
+    app.globalData.checkLoginStatus(true);
   },
   methods: {
     // 获取当前位置
@@ -55,6 +61,8 @@ const _sfc_main = {
         return;
       this.loading = true;
       try {
+        const app = getApp();
+        const userId = app.globalData.getUserId();
         const res = await common_vendor.er.callFunction({
           name: "get-spots",
           data: {
@@ -62,7 +70,8 @@ const _sfc_main = {
             page: this.page,
             pageSize: this.pageSize,
             longitude: this.longitude,
-            latitude: this.latitude
+            latitude: this.latitude,
+            user_id: userId
           }
         });
         if (res.result.code === 0) {
@@ -86,7 +95,7 @@ const _sfc_main = {
           this.noMore = this.spotList.length >= total;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/spots/spots.vue:165", "获取景点列表失败:", e);
+        common_vendor.index.__f__("error", "at pages/spots/spots.vue:178", "获取景点列表失败:", e);
         common_vendor.index.showToast({
           title: "获取景点列表失败",
           icon: "none"

@@ -31,7 +31,13 @@ const _sfc_main = {
       showNavigation: false
     };
   },
+  onShow() {
+    const app = getApp();
+    app.globalData.checkLoginStatus(true);
+  },
   onLoad(options) {
+    const app = getApp();
+    app.globalData.checkLoginStatus(true);
     const systemInfo = common_vendor.index.getSystemInfoSync();
     this.listHeight = systemInfo.windowHeight - 350;
     this.getCurrentLocation();
@@ -44,6 +50,8 @@ const _sfc_main = {
     // 获取景点列表
     async getSpotList() {
       try {
+        const app = getApp();
+        const userId = app.globalData.getUserId();
         const res = await common_vendor.er.callFunction({
           name: "get-spots",
           data: {
@@ -51,18 +59,17 @@ const _sfc_main = {
             latitude: this.latitude,
             page: 1,
             pageSize: 10,
-            sortBy: "distance",
-            sortOrder: "asc"
+            user_id: userId
           }
         });
         if (res.result.code === 0) {
           this.spotList = res.result.data.list;
           this.spotList.sort((a, b) => a.distance - b.distance);
-          common_vendor.index.__f__("log", "at pages/map/map.vue:151", "景点列表", this.spotList);
+          common_vendor.index.__f__("log", "at pages/map/map.vue:162", "景点列表", this.spotList);
           this.updateMarkers();
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/map/map.vue:156", "获取景点列表失败:", e);
+        common_vendor.index.__f__("error", "at pages/map/map.vue:167", "获取景点列表失败:", e);
         common_vendor.index.showToast({
           title: "获取景点列表失败",
           icon: "none"
@@ -72,9 +79,14 @@ const _sfc_main = {
     // 获取景点信息
     async getSpotInfo(id) {
       try {
+        const app = getApp();
+        const userId = app.globalData.getUserId();
         const res = await common_vendor.er.callFunction({
           name: "get-spot-detail",
-          data: { id }
+          data: {
+            id,
+            user_id: userId
+          }
         });
         if (res.result.code === 0) {
           this.spot = res.result.data;
@@ -92,7 +104,7 @@ const _sfc_main = {
           }
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/map/map.vue:190", "获取景点信息失败:", e);
+        common_vendor.index.__f__("error", "at pages/map/map.vue:206", "获取景点信息失败:", e);
         common_vendor.index.showToast({
           title: "获取景点信息失败",
           icon: "none"
@@ -136,7 +148,7 @@ const _sfc_main = {
             this.updateMarkers();
           },
           (error) => {
-            common_vendor.index.__f__("error", "at pages/map/map.vue:246", "获取位置失败:", error);
+            common_vendor.index.__f__("error", "at pages/map/map.vue:262", "获取位置失败:", error);
             this.useDefaultLocation();
           }
         );
@@ -159,7 +171,7 @@ const _sfc_main = {
           this.updateMarkers();
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/map/map.vue:271", "获取位置失败:", err);
+          common_vendor.index.__f__("error", "at pages/map/map.vue:287", "获取位置失败:", err);
           this.useDefaultLocation();
         }
       });
@@ -249,7 +261,7 @@ const _sfc_main = {
         name: this.spot.name,
         address: this.spot.address,
         success: () => {
-          common_vendor.index.__f__("log", "at pages/map/map.vue:375", "打开导航成功");
+          common_vendor.index.__f__("log", "at pages/map/map.vue:391", "打开导航成功");
         },
         fail: () => {
           common_vendor.index.showToast({

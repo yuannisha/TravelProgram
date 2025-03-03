@@ -43,14 +43,16 @@ const _sfc_main = {
           name: "get-favorite-status",
           data: {
             uid,
+            type: "spot",
             spotId: this.spotId
           }
         });
-        common_vendor.index.__f__("log", "at pages/spots/detail.vue:244", "favoriteRes", favoriteRes);
+        common_vendor.index.__f__("log", "at pages/spots/detail.vue:245", "favoriteRes", favoriteRes);
         if (res.result.code === 0) {
           this.spotDetail = res.result.data;
+          common_vendor.index.__f__("log", "at pages/spots/detail.vue:248", "favoriteRes.result.data", favoriteRes);
           this.spotDetail.isFavorite = favoriteRes.result.data.isFavorite;
-          common_vendor.index.__f__("log", "at pages/spots/detail.vue:248", "this.spotDetail", this.spotDetail);
+          common_vendor.index.__f__("log", "at pages/spots/detail.vue:251", "this.spotDetail", this.spotDetail);
         } else {
           common_vendor.index.showToast({
             title: res.result.message,
@@ -58,7 +60,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/spots/detail.vue:258", "获取景点详情失败:", e);
+        common_vendor.index.__f__("error", "at pages/spots/detail.vue:261", "获取景点详情失败:", e);
         common_vendor.index.showToast({
           title: "获取详情失败",
           icon: "none"
@@ -75,12 +77,13 @@ const _sfc_main = {
         return;
       }
       const uid = common_vendor.index.getStorageSync("userInfo").id;
-      common_vendor.index.__f__("log", "at pages/spots/detail.vue:277", "uid", uid);
+      common_vendor.index.__f__("log", "at pages/spots/detail.vue:280", "uid", uid);
       try {
         const res = await common_vendor.er.callFunction({
           name: "toggle-favorite",
           data: {
             uid,
+            type: "spot",
             spotId: this.spotId
           }
         });
@@ -97,7 +100,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/spots/detail.vue:301", "操作收藏失败:", e);
+        common_vendor.index.__f__("error", "at pages/spots/detail.vue:305", "操作收藏失败:", e);
         common_vendor.index.showToast({
           title: "操作失败",
           icon: "none"
@@ -123,7 +126,7 @@ const _sfc_main = {
     // 跳转到评论列表页
     goToComments() {
       const userId = common_vendor.index.getStorageSync("userInfo").id;
-      common_vendor.index.__f__("log", "at pages/spots/detail.vue:331", "userId", userId);
+      common_vendor.index.__f__("log", "at pages/spots/detail.vue:335", "userId", userId);
       if (!userId) {
         common_vendor.index.navigateTo({
           url: "/pages/user/login"
@@ -182,7 +185,7 @@ const _sfc_main = {
         this.commentImages.push(...uploadResults.map((item) => item.fileID));
         common_vendor.index.hideLoading();
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/spots/detail.vue:400", "选择图片失败:", e);
+        common_vendor.index.__f__("error", "at pages/spots/detail.vue:404", "选择图片失败:", e);
         common_vendor.index.showToast({
           title: "上传图片失败",
           icon: "none"
@@ -223,7 +226,7 @@ const _sfc_main = {
           throw new Error(res.result.message);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/spots/detail.vue:448", "提交评论失败:", e);
+        common_vendor.index.__f__("error", "at pages/spots/detail.vue:452", "提交评论失败:", e);
         common_vendor.index.showToast({
           title: e.message || "评论失败",
           icon: "none"

@@ -15,7 +15,12 @@
     "pages/spots/search",
     "pages/user/settings",
     "pages/user/about",
-    "pages/spots/comments"
+    "pages/spots/comments",
+    "pages/plans/plans",
+    "pages/plans/plan-edit",
+    "pages/plans/plan-detail",
+    "pages/plans/public-plans",
+    "pages/plans/spot-select"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -46,6 +51,12 @@
         "text": "地图",
         "iconPath": "static/tabbar/map.png",
         "selectedIconPath": "static/tabbar/map-active.png"
+      },
+      {
+        "pagePath": "pages/plans/public-plans",
+        "text": "灵感",
+        "iconPath": "static/tabbar/spots.png",
+        "selectedIconPath": "static/tabbar/spots-active.png"
       },
       {
         "pagePath": "pages/user/user",

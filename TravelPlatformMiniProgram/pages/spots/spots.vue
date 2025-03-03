@@ -90,9 +90,18 @@ export default {
 			latitude: null
 		}
 	},
+	onShow() {
+		// 页面加载时检查登录状态
+		const app = getApp();
+		app.globalData.checkLoginStatus(true); // 不强制跳转，只检查状态
+	},
 	onLoad() {
 		// 获取当前位置
 		this.getCurrentLocation()
+		
+		// 页面加载时检查登录状态
+		const app = getApp();
+		app.globalData.checkLoginStatus(true); // 不强制跳转，只检查状态
 	},
 	methods: {
 		// 获取当前位置
@@ -127,6 +136,9 @@ export default {
 			this.loading = true
 			
 			try {
+				const app = getApp();
+				const userId = app.globalData.getUserId();
+				
 				const res = await uniCloud.callFunction({
 					name: 'get-spots',
 					data: {
@@ -134,7 +146,8 @@ export default {
 						page: this.page,
 						pageSize: this.pageSize,
 						longitude: this.longitude,
-						latitude: this.latitude
+						latitude: this.latitude,
+						user_id: userId
 					}
 				})
 				

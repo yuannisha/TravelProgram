@@ -1,0 +1,109 @@
+{
+	"bsonType": "object",
+	"required": ["user_id", "title", "start_date", "end_date"],
+	"permission": {
+		"read": "auth.uid != null",
+		"create": "auth.uid != null",
+		"update": "auth.uid != null && doc.user_id == auth.uid",
+		"delete": "auth.uid != null && doc.user_id == auth.uid"
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"user_id": {
+			"bsonType": "string",
+			"description": "用户ID",
+			"forceDefaultValue": {
+				"$env": "uid"
+			}
+		},
+		"title": {
+			"bsonType": "string",
+			"description": "计划标题",
+			"title": "标题",
+			"trim": "both",
+			"maxLength": 100
+		},
+		"description": {
+			"bsonType": "string",
+			"description": "计划描述",
+			"title": "描述",
+			"trim": "both",
+			"maxLength": 500
+		},
+		"start_date": {
+			"bsonType": "timestamp",
+			"description": "开始日期",
+			"title": "开始日期"
+		},
+		"end_date": {
+			"bsonType": "timestamp",
+			"description": "结束日期",
+			"title": "结束日期"
+		},
+		"spots": {
+			"bsonType": "array",
+			"description": "计划包含的景点",
+			"title": "景点列表",
+			"items": {
+				"bsonType": "object",
+				"properties": {
+					"spot_id": {
+						"bsonType": "string",
+						"description": "景点ID",
+						"foreignKey": "travel-spots._id"
+					},
+					"visit_date": {
+						"bsonType": "timestamp",
+						"description": "计划游览日期"
+					},
+					"notes": {
+						"bsonType": "string",
+						"description": "景点游览备注",
+						"maxLength": 200
+					}
+				}
+			}
+		},
+		"status": {
+			"bsonType": "int",
+			"description": "计划状态：0-计划中，1-进行中，2-已完成",
+			"title": "状态",
+			"minimum": 0,
+			"maximum": 2,
+			"defaultValue": 0
+		},
+		"is_public": {
+			"bsonType": "bool",
+			"description": "是否公开：true-公开，false-私有",
+			"title": "是否公开",
+			"defaultValue": false
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"update_date": {
+			"bsonType": "timestamp",
+			"description": "更新时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		}
+	},
+	"indexes": [
+		{
+			"IndexName": "user_id",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "user_id",
+					"Direction": "1"
+				}]
+			}
+		}
+	]
+} 

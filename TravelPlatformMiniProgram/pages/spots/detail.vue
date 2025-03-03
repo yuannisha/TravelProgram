@@ -237,6 +237,7 @@ export default {
 					name: 'get-favorite-status',
 					data: {
 						uid: uid,
+						type: 'spot',
 						spotId: this.spotId
 					}
 
@@ -244,7 +245,9 @@ export default {
 				console.log("favoriteRes",favoriteRes)
 				if (res.result.code === 0) {
 					this.spotDetail = res.result.data
+					console.log("favoriteRes.result.data",favoriteRes)
 					this.spotDetail.isFavorite = favoriteRes.result.data.isFavorite
+					
 					console.log("this.spotDetail",this.spotDetail)
 
 				} else {
@@ -280,6 +283,7 @@ export default {
 					name: 'toggle-favorite',
 					data: {
 						uid: uid,
+						type: 'spot',
 						spotId: this.spotId
 					}
 

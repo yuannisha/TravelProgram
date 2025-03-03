@@ -340,11 +340,22 @@
   border-radius: 12rpx;
   font-size: 28rpx;
   color: #333333;
+  border: 1rpx solid #EEEEEE;
 }
 .form-item .form-error {
   font-size: 24rpx;
   color: #FF5B05;
   margin-top: 10rpx;
+}
+
+/* 输入框通用样式 */
+input {
+  border: 1rpx solid #EEEEEE;
+}
+.input-box {
+  border: 1rpx solid #EEEEEE;
+  border-radius: 12rpx;
+  overflow: hidden;
 }
 
 /* 图标字体基础样式 */
@@ -470,4 +481,120 @@
 .recommend-section .spot-list .spot-item .spot-info .rating .price {
   font-size: 24rpx;
   color: #FF5B05;
+}
+.plan-section {
+  margin-top: 20rpx;
+  background-color: #fff;
+  padding: 20rpx;
+}
+.plan-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.plan-section .section-header .title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+.plan-section .section-header .more {
+  font-size: 24rpx;
+  color: #999;
+}
+.plan-section .loading-plans {
+  height: 200rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plan-section .plan-scroll .scroll-view {
+  white-space: nowrap;
+}
+.plan-section .plan-scroll .scroll-view .plan-item {
+  display: inline-block;
+  width: 400rpx;
+  margin-right: 20rpx;
+  background-color: #f8f8f8;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.plan-section .plan-scroll .scroll-view .plan-item:last-child {
+  margin-right: 0;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .user-info {
+  display: flex;
+  align-items: center;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .user-info .avatar {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .user-info .username {
+  font-size: 24rpx;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150rpx;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .status {
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .status.status-0 {
+  color: #007AFF;
+  background-color: rgba(0, 122, 255, 0.1);
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .status.status-1 {
+  color: #FF9500;
+  background-color: rgba(255, 149, 0, 0.1);
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-top .status.status-2 {
+  color: #4CD964;
+  background-color: rgba(76, 217, 100, 0.1);
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-content .plan-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plan-section .plan-scroll .scroll-view .plan-item .plan-content .plan-date, .plan-section .plan-scroll .scroll-view .plan-item .plan-content .plan-spots {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 6rpx;
+}
+.plan-section .empty-plans {
+  height: 200rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.plan-section .empty-plans text {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+}
+.plan-section .empty-plans .create-btn {
+  font-size: 24rpx;
+  color: #fff;
+  background-color: #2B9939;
+  border-radius: 30rpx;
+  padding: 10rpx 30rpx;
+  line-height: 1.5;
 }

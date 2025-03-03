@@ -112,7 +112,16 @@ export default {
 			showNavigation: false,
 		}
 	},
+	onShow() {
+		// 页面加载时检查登录状态
+		const app = getApp();
+		app.globalData.checkLoginStatus(true);
+	},	
 	onLoad(options) {
+		// 页面加载时检查登录状态
+		const app = getApp();
+		app.globalData.checkLoginStatus(true);
+		
 		// 获取列表容器高度
 		const systemInfo = uni.getSystemInfoSync()
 		this.listHeight = systemInfo.windowHeight - 350
@@ -132,6 +141,9 @@ export default {
 		// 获取景点列表
 		async getSpotList() {
 			try {
+				const app = getApp();
+				const userId = app.globalData.getUserId();
+				
 				const res = await uniCloud.callFunction({
 					name: 'get-spots',
 					data: {
@@ -139,8 +151,7 @@ export default {
 						latitude: this.latitude,
 						page: 1,
 						pageSize: 10,
-						sortBy: 'distance',
-						sortOrder: 'asc'
+						user_id: userId
 					}
 				})
 				
@@ -164,10 +175,15 @@ export default {
 		// 获取景点信息
 		async getSpotInfo(id) {
 			try {
+				const app = getApp();
+				const userId = app.globalData.getUserId();
 
 				const res = await uniCloud.callFunction({
 					name: 'get-spot-detail',
-					data: { id }
+					data: { 
+						id,
+						user_id: userId
+					}
 				})
 				
 				if (res.result.code === 0) {

@@ -9,7 +9,13 @@ const _sfc_main = {
     };
   },
   onShow() {
+    const app = getApp();
+    app.globalData.checkLoginStatus(true);
     this.checkLoginStatus();
+  },
+  onLoad() {
+    const app = getApp();
+    app.globalData.checkLoginStatus(true);
   },
   methods: {
     // 检查登录状态
@@ -18,7 +24,7 @@ const _sfc_main = {
       this.isLogin = !!token;
       if (this.isLogin) {
         this.userInfo = common_vendor.index.getStorageSync("userInfo");
-        common_vendor.index.__f__("log", "at pages/user/user.vue:85", this.userInfo);
+        common_vendor.index.__f__("log", "at pages/user/user.vue:99", this.userInfo);
       } else {
         this.userInfo = {
           avatar: "/static/avatar/default-avatar.png",
@@ -45,6 +51,16 @@ const _sfc_main = {
       }
       common_vendor.index.navigateTo({
         url: "/pages/user/favorites"
+      });
+    },
+    // 跳转到旅行计划页
+    goToPlans() {
+      if (!this.isLogin) {
+        this.goToLogin();
+        return;
+      }
+      common_vendor.index.navigateTo({
+        url: "/pages/plans/plans"
       });
     },
     // 跳转到设置页
@@ -115,11 +131,12 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, {
     h: common_vendor.o((...args) => $options.goToProfile && $options.goToProfile(...args)),
     i: common_vendor.o((...args) => $options.goToFavorites && $options.goToFavorites(...args)),
-    j: common_vendor.o((...args) => $options.goToSettings && $options.goToSettings(...args)),
-    k: common_vendor.o((...args) => $options.goToAbout && $options.goToAbout(...args)),
-    l: $data.isLogin
+    j: common_vendor.o((...args) => $options.goToPlans && $options.goToPlans(...args)),
+    k: common_vendor.o((...args) => $options.goToSettings && $options.goToSettings(...args)),
+    l: common_vendor.o((...args) => $options.goToAbout && $options.goToAbout(...args)),
+    m: $data.isLogin
   }, $data.isLogin ? {
-    m: common_vendor.o((...args) => $options.logout && $options.logout(...args))
+    n: common_vendor.o((...args) => $options.logout && $options.logout(...args))
   } : {});
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

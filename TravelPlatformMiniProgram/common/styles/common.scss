@@ -247,6 +247,7 @@ $bg-color: #F5F5F5;
 		border-radius: 12rpx;
 		font-size: 28rpx;
 		color: $text-color;
+		border: 1rpx solid $border-color;
 	}
 	
 	.form-error {
@@ -254,6 +255,17 @@ $bg-color: #F5F5F5;
 		color: $danger-color;
 		margin-top: 10rpx;
 	}
+}
+
+/* 输入框通用样式 */
+input {
+	border: 1rpx solid $border-color;
+}
+
+.input-box {
+	border: 1rpx solid $border-color;
+	border-radius: 12rpx;
+	overflow: hidden;
 }
 
 /* 图标字体基础样式 */

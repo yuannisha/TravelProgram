@@ -318,15 +318,19 @@ export default {
 </script>
 
 <style lang="scss">
+@import '@/common/styles/common.scss';
+
 .container {
-	padding: 60rpx 40rpx;
+	padding: 40rpx;
+	min-height: 100vh;
+	background-color: #fff;
 }
 
 .header {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	margin-bottom: 80rpx;
+	margin-bottom: 60rpx;
 	
 	.logo {
 		width: 160rpx;
@@ -336,47 +340,53 @@ export default {
 	
 	.title {
 		font-size: 40rpx;
-		color: #333;
 		font-weight: bold;
+		color: $text-color;
 		margin-bottom: 10rpx;
 	}
 	
 	.subtitle {
 		font-size: 28rpx;
-		color: #999;
+		color: $text-color-light;
 	}
 }
 
 .form-box {
 	.input-group {
-		margin-bottom: 40rpx;
+		margin-bottom: 30rpx;
 		
 		.label {
 			font-size: 28rpx;
-			color: #333;
-			margin-bottom: 20rpx;
+			color: $text-color;
+			margin-bottom: 15rpx;
 			display: block;
 		}
 		
 		.input-box {
 			display: flex;
 			align-items: center;
-			height: 88rpx;
-			padding: 0 30rpx;
-			background-color: #f5f5f5;
+			height: 90rpx;
+			background-color: $bg-color;
 			border-radius: 12rpx;
+			padding: 0 30rpx;
+			border: 1rpx solid $border-color;
 			
 			.prefix {
-				font-size: 28rpx;
-				color: #333;
+				color: $text-color-secondary;
 				margin-right: 20rpx;
+				font-size: 28rpx;
 			}
 			
 			input {
 				flex: 1;
 				height: 100%;
 				font-size: 28rpx;
-				color: #333;
+				border: none;
+			}
+			
+			.iconfont {
+				color: $text-color-light;
+				font-size: 36rpx;
 			}
 			
 			.code-btn {
@@ -384,54 +394,86 @@ export default {
 				height: 60rpx;
 				line-height: 60rpx;
 				font-size: 24rpx;
-				color: #fff;
-				background-color: #2B9939;
+				background-color: #E0E0E0;
+				color: $text-color-light;
 				border-radius: 30rpx;
-				padding: 0;
 				margin: 0;
+				padding: 0;
 				
-				&[disabled] {
-					background-color: #ccc;
+				&:not(:disabled) {
+					background-color: $primary-color;
+					color: #fff;
 				}
-				
-				&::after {
-					border: none;
-				}
-			}
-			
-			.iconfont {
-				font-size: 40rpx;
-				color: #999;
-				padding: 20rpx;
-				margin-right: -20rpx;
 			}
 		}
 		
 		.error {
 			font-size: 24rpx;
-			color: #FF5B05;
+			color: $danger-color;
 			margin-top: 10rpx;
+			padding-left: 10rpx;
+		}
+		
+		.tips {
+			font-size: 24rpx;
+			color: $text-color-light;
+			margin-top: 10rpx;
+			padding-left: 10rpx;
+		}
+	}
+}
+
+.gender-box {
+	display: flex;
+	
+	.gender-option {
+		flex: 1;
+		height: 90rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: $bg-color;
+		border-radius: 12rpx;
+		margin-right: 20rpx;
+		border: 1rpx solid $border-color;
+		
+		&:last-child {
+			margin-right: 0;
+		}
+		
+		&.active {
+			background-color: rgba($primary-color, 0.1);
+			border-color: $primary-color;
+			
+			text {
+				color: $primary-color;
+			}
+		}
+		
+		.iconfont {
+			margin-right: 10rpx;
+			font-size: 32rpx;
+		}
+		
+		text {
+			font-size: 28rpx;
+			color: $text-color;
 		}
 	}
 }
 
 .submit-btn {
 	width: 100%;
-	height: 88rpx;
-	line-height: 88rpx;
-	text-align: center;
-	background-color: #ccc;
+	height: 90rpx;
+	line-height: 90rpx;
+	background-color: #E0E0E0;
 	color: #fff;
 	font-size: 32rpx;
-	border-radius: 44rpx;
-	margin: 60rpx 0;
+	border-radius: 45rpx;
+	margin: 60rpx 0 40rpx;
 	
-	&.active {
-		background-color: #2B9939;
-	}
-	
-	&::after {
-		border: none;
+	&:not(:disabled) {
+		background-color: $primary-color;
 	}
 }
 
@@ -448,10 +490,10 @@ export default {
 	
 	.agreement-text {
 		font-size: 24rpx;
-		color: #999;
+		color: $text-color-light;
 		
 		.link {
-			color: #2B9939;
+			color: $primary-color;
 		}
 	}
 }
@@ -459,42 +501,11 @@ export default {
 .login-link {
 	text-align: center;
 	font-size: 28rpx;
-	color: #999;
+	color: $text-color-secondary;
 	
 	.link {
-		color: #2B9939;
+		color: $primary-color;
 		margin-left: 10rpx;
 	}
-}
-
-.gender-box {
-	display: flex;
-	justify-content: space-around;
-	padding: 20rpx 0;
-	
-	.gender-option {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 20rpx 40rpx;
-		border-radius: 12rpx;
-		background-color: #f5f5f5;
-		
-		&.active {
-			background-color: rgba(43, 153, 57, 0.1);
-			color: #2B9939;
-		}
-		
-		.iconfont {
-			font-size: 48rpx;
-			margin-bottom: 10rpx;
-		}
-	}
-}
-
-.tips {
-	font-size: 24rpx;
-	color: #999;
-	margin-top: 10rpx;
 }
 </style> 

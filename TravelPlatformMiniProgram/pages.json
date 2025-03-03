@@ -1,5 +1,5 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
 		{
 			"path": "pages/index/index",
 			"style": {
@@ -102,6 +102,38 @@
 					"bounce": "none"
 				}
 			}
+		},
+		{
+			"path": "pages/plans/plans",
+			"style": {
+				"navigationBarTitleText": "我的旅行计划",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/plans/plan-edit",
+			"style": {
+				"navigationBarTitleText": "编辑旅行计划"
+			}
+		},
+		{
+			"path": "pages/plans/plan-detail",
+			"style": {
+				"navigationBarTitleText": "计划详情"
+			}
+		},
+		{
+			"path": "pages/plans/public-plans",
+			"style": {
+				"navigationBarTitleText": "旅行灵感",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/plans/spot-select",
+			"style": {
+				"navigationBarTitleText": "选择景点"
+			}
 		}
 	],
 	"globalStyle": {
@@ -133,6 +165,12 @@
 				"text": "地图",
 				"iconPath": "static/tabbar/map.png",
 				"selectedIconPath": "static/tabbar/map-active.png"
+			},
+			{
+				"pagePath": "pages/plans/public-plans",
+				"text": "灵感",
+				"iconPath": "static/tabbar/spots.png",
+				"selectedIconPath": "static/tabbar/spots-active.png"
 			},
 			{
 				"pagePath": "pages/user/user",

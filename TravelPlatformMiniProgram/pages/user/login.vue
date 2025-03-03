@@ -175,7 +175,7 @@ export default {
 				console.log("登录结果：", res)
 
 				if (res.result.code === 0) {
-					// 保存token和用户信息
+					// 登录成功，保存token和用户信息
 					uni.setStorageSync('token', res.result.token)
 					uni.setStorageSync('userInfo', res.result.userInfo)
 					
@@ -184,11 +184,16 @@ export default {
 						icon: 'success'
 					})
 					
-					// 返回上一页
+					// 登录成功后返回上一页或首页
 					setTimeout(() => {
-						uni.switchTab({
-							url: '/pages/user/user'	
-						})
+						const pages = getCurrentPages()
+						if (pages.length > 1) {
+							uni.navigateBack()
+						} else {
+							uni.switchTab({
+								url: '/pages/index/index'
+							})
+						}
 					}, 1500)
 
 				} else {
@@ -231,23 +236,22 @@ export default {
 </script>
 
 <style lang="scss">
+@import '@/common/styles/common.scss';
+
 .container {
-	padding: 60rpx 40rpx;
+	padding: 40rpx;
+	min-height: 100vh;
+	background-color: #fff;
 }
 
 .header {
-	margin-bottom: 60rpx;
-	
-	.title {
-		font-size: 48rpx;
-		font-weight: bold;
-		color: #333;
-		margin-bottom: 20rpx;
-	}
+	margin-top: 100rpx;
+	margin-bottom: 80rpx;
 	
 	.subtitle {
-		font-size: 28rpx;
-		color: #999;
+		font-size: 36rpx;
+		color: $text-color;
+		font-weight: bold;
 	}
 }
 
@@ -259,48 +263,46 @@ export default {
 		align-items: center;
 		height: 100rpx;
 		padding: 0 30rpx;
-		background-color: #f5f5f5;
+		background-color: $bg-color;
 		border-radius: 12rpx;
-		margin-bottom: 20rpx;
+		margin-bottom: 30rpx;
+		border: 1rpx solid $border-color;
 		
 		.iconfont {
-			font-size: 40rpx;
-			color: #999;
 			margin-right: 20rpx;
+			color: $text-color-light;
 		}
 		
 		input {
 			flex: 1;
 			height: 100%;
-			font-size: 28rpx;
+			border: none;
 		}
 		
 		.code-btn {
 			width: 200rpx;
 			height: 60rpx;
 			line-height: 60rpx;
-			text-align: center;
 			font-size: 24rpx;
-			color: #999;
-			background-color: #eee;
+			background-color: #E0E0E0;
+			color: $text-color-light;
 			border-radius: 30rpx;
-			margin-left: 20rpx;
+			margin: 0;
+			padding: 0;
 			
 			&.active {
+				background-color: $primary-color;
 				color: #fff;
-				background-color: #2B9939;
-			}
-			
-			&::after {
-				border: none;
 			}
 		}
 	}
 	
 	.error-text {
 		font-size: 24rpx;
-		color: #ff5b05;
-		margin: -10rpx 0 20rpx 30rpx;
+		color: $danger-color;
+		margin-top: -20rpx;
+		margin-bottom: 20rpx;
+		padding-left: 10rpx;
 	}
 }
 
@@ -308,19 +310,14 @@ export default {
 	width: 100%;
 	height: 90rpx;
 	line-height: 90rpx;
-	text-align: center;
-	font-size: 32rpx;
+	background-color: #E0E0E0;
 	color: #fff;
-	background-color: #ddd;
+	font-size: 32rpx;
 	border-radius: 45rpx;
 	margin-bottom: 40rpx;
 	
 	&.active {
-		background-color: #2B9939;
-	}
-	
-	&::after {
-		border: none;
+		background-color: $primary-color;
 	}
 }
 
@@ -337,10 +334,10 @@ export default {
 	
 	.agreement-text {
 		font-size: 24rpx;
-		color: #999;
+		color: $text-color-light;
 		
 		.link {
-			color: #2B9939;
+			color: $primary-color;
 		}
 	}
 }
@@ -348,11 +345,10 @@ export default {
 .register-link {
 	text-align: center;
 	font-size: 28rpx;
-	color: #999;
-	margin-top: 40rpx;
+	color: $text-color-secondary;
 	
 	.link {
-		color: #2B9939;
+		color: $primary-color;
 		margin-left: 10rpx;
 	}
 }

@@ -1,0 +1,587 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+/* 引入公共样式 */
+/* 全局样式变量 */
+/* 文本样式 */
+.text-primary {
+  color: #2B9939;
+}
+.text-danger {
+  color: #FF5B05;
+}
+.text-warning {
+  color: #FF9500;
+}
+.text-secondary {
+  color: #666666;
+}
+.text-light {
+  color: #999999;
+}
+.text-bold {
+  font-weight: bold;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+/* 边距样式 */
+.m-1 {
+  margin: 10rpx;
+}
+.mt-1 {
+  margin-top: 10rpx;
+}
+.mb-1 {
+  margin-bottom: 10rpx;
+}
+.ml-1 {
+  margin-left: 10rpx;
+}
+.mr-1 {
+  margin-right: 10rpx;
+}
+.p-1 {
+  padding: 10rpx;
+}
+.pt-1 {
+  padding-top: 10rpx;
+}
+.pb-1 {
+  padding-bottom: 10rpx;
+}
+.pl-1 {
+  padding-left: 10rpx;
+}
+.pr-1 {
+  padding-right: 10rpx;
+}
+.m-2 {
+  margin: 20rpx;
+}
+.mt-2 {
+  margin-top: 20rpx;
+}
+.mb-2 {
+  margin-bottom: 20rpx;
+}
+.ml-2 {
+  margin-left: 20rpx;
+}
+.mr-2 {
+  margin-right: 20rpx;
+}
+.p-2 {
+  padding: 20rpx;
+}
+.pt-2 {
+  padding-top: 20rpx;
+}
+.pb-2 {
+  padding-bottom: 20rpx;
+}
+.pl-2 {
+  padding-left: 20rpx;
+}
+.pr-2 {
+  padding-right: 20rpx;
+}
+.m-3 {
+  margin: 30rpx;
+}
+.mt-3 {
+  margin-top: 30rpx;
+}
+.mb-3 {
+  margin-bottom: 30rpx;
+}
+.ml-3 {
+  margin-left: 30rpx;
+}
+.mr-3 {
+  margin-right: 30rpx;
+}
+.p-3 {
+  padding: 30rpx;
+}
+.pt-3 {
+  padding-top: 30rpx;
+}
+.pb-3 {
+  padding-bottom: 30rpx;
+}
+.pl-3 {
+  padding-left: 30rpx;
+}
+.pr-3 {
+  padding-right: 30rpx;
+}
+.m-4 {
+  margin: 40rpx;
+}
+.mt-4 {
+  margin-top: 40rpx;
+}
+.mb-4 {
+  margin-bottom: 40rpx;
+}
+.ml-4 {
+  margin-left: 40rpx;
+}
+.mr-4 {
+  margin-right: 40rpx;
+}
+.p-4 {
+  padding: 40rpx;
+}
+.pt-4 {
+  padding-top: 40rpx;
+}
+.pb-4 {
+  padding-bottom: 40rpx;
+}
+.pl-4 {
+  padding-left: 40rpx;
+}
+.pr-4 {
+  padding-right: 40rpx;
+}
+.m-5 {
+  margin: 50rpx;
+}
+.mt-5 {
+  margin-top: 50rpx;
+}
+.mb-5 {
+  margin-bottom: 50rpx;
+}
+.ml-5 {
+  margin-left: 50rpx;
+}
+.mr-5 {
+  margin-right: 50rpx;
+}
+.p-5 {
+  padding: 50rpx;
+}
+.pt-5 {
+  padding-top: 50rpx;
+}
+.pb-5 {
+  padding-bottom: 50rpx;
+}
+.pl-5 {
+  padding-left: 50rpx;
+}
+.pr-5 {
+  padding-right: 50rpx;
+}
+
+/* 布局样式 */
+.flex {
+  display: flex;
+}
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+.align-start {
+  align-items: flex-start;
+}
+.align-end {
+  align-items: flex-end;
+}
+.align-center {
+  align-items: center;
+}
+
+/* 常用组件样式 */
+.card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+.divider {
+  height: 1rpx;
+  background-color: #EEEEEE;
+  margin: 20rpx 0;
+}
+.badge {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  font-size: 22rpx;
+  border-radius: 4rpx;
+}
+.badge.badge-primary {
+  color: #2B9939;
+  background-color: rgba(43, 153, 57, 0.1);
+}
+.badge.badge-danger {
+  color: #FF5B05;
+  background-color: rgba(255, 91, 5, 0.1);
+}
+.badge.badge-warning {
+  color: #FF9500;
+  background-color: rgba(255, 149, 0, 0.1);
+}
+
+/* 按钮样式 */
+.btn {
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  padding: 0 40rpx;
+}
+.btn::after {
+  border: none;
+}
+.btn.btn-primary {
+  background-color: #2B9939;
+  color: #fff;
+}
+.btn.btn-danger {
+  background-color: #FF5B05;
+  color: #fff;
+}
+.btn.btn-warning {
+  background-color: #FF9500;
+  color: #fff;
+}
+.btn.btn-outline {
+  background-color: transparent;
+  border: 1rpx solid #2B9939;
+  color: #2B9939;
+}
+.btn.btn-disabled {
+  background-color: #ccc;
+  color: #fff;
+}
+
+/* 列表样式 */
+.list {
+  background-color: #fff;
+}
+.list .list-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #EEEEEE;
+}
+.list .list-item:last-child {
+  border-bottom: none;
+}
+.list .list-item .item-content {
+  flex: 1;
+}
+.list .list-item .item-extra {
+  margin-left: 20rpx;
+}
+
+/* 表单样式 */
+.form-item {
+  margin-bottom: 30rpx;
+}
+.form-item .form-label {
+  font-size: 28rpx;
+  color: #333333;
+  margin-bottom: 10rpx;
+}
+.form-item .form-input {
+  height: 88rpx;
+  padding: 0 30rpx;
+  background-color: #F5F5F5;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333333;
+  border: 1rpx solid #EEEEEE;
+}
+.form-item .form-error {
+  font-size: 24rpx;
+  color: #FF5B05;
+  margin-top: 10rpx;
+}
+
+/* 输入框通用样式 */
+input {
+  border: 1rpx solid #EEEEEE;
+}
+.input-box {
+  border: 1rpx solid #EEEEEE;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+/* 图标字体基础样式 */
+.iconfont {
+  font-family: "iconfont";
+  font-size: 32rpx;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 添加文本省略 mixin */
+/* 为了方便使用，也添加一个通用类 */
+.text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 30rpx;
+}
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300rpx;
+}
+.plan-header {
+  background-color: #ffffff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.plan-header .title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.plan-header .title-section .title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333333;
+  flex: 1;
+}
+.plan-header .title-section .status {
+  padding: 6rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+.plan-header .title-section .status.status-0 {
+  color: #007AFF;
+  background-color: rgba(0, 122, 255, 0.1);
+}
+.plan-header .title-section .status.status-1 {
+  color: #FF9500;
+  background-color: rgba(255, 149, 0, 0.1);
+}
+.plan-header .title-section .status.status-2 {
+  color: #4CD964;
+  background-color: rgba(76, 217, 100, 0.1);
+}
+.plan-header .user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 10rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.plan-header .user-info .avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+.plan-header .user-info .username {
+  font-size: 28rpx;
+  color: #333333;
+}
+.plan-header .date-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.plan-header .date-section text {
+  font-size: 28rpx;
+  color: #666666;
+  margin-left: 10rpx;
+}
+.plan-header .desc-section {
+  margin-bottom: 20rpx;
+}
+.plan-header .desc-section text {
+  font-size: 28rpx;
+  color: #666666;
+  line-height: 1.5;
+}
+.plan-header .action-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+.plan-header .action-section .action-btn {
+  display: flex;
+  align-items: center;
+  margin-left: 30rpx;
+}
+.plan-header .action-section .action-btn text {
+  font-size: 28rpx;
+  margin-left: 6rpx;
+}
+.plan-header .action-section .action-btn.edit {
+  color: #007AFF;
+}
+.plan-header .action-section .action-btn.share {
+  color: #4CD964;
+}
+.plan-header .action-section .action-btn.delete {
+  color: #FF3B30;
+}
+.plan-header .action-section .action-btn.like {
+  color: #999;
+}
+.plan-header .action-section .action-btn.like.active {
+  color: #FF5A5F;
+}
+.spots-section {
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+}
+.spots-section .section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 30rpx;
+}
+.spots-section .spots-list .spot-item {
+  position: relative;
+  margin-bottom: 40rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx dashed #f0f0f0;
+}
+.spots-section .spots-list .spot-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.spots-section .spots-list .spot-item .spot-day {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 6rpx 20rpx;
+  background-color: rgba(0, 122, 255, 0.8);
+  color: #ffffff;
+  font-size: 24rpx;
+  border-radius: 10rpx 0 10rpx 0;
+  z-index: 1;
+}
+.spots-section .spots-list .spot-item .spot-content {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+.spots-section .spots-list .spot-item .spot-content .spot-image {
+  width: 200rpx;
+  height: 150rpx;
+  border-radius: 10rpx;
+  margin-right: 20rpx;
+}
+.spots-section .spots-list .spot-item .spot-content .spot-info {
+  flex: 1;
+}
+.spots-section .spots-list .spot-item .spot-content .spot-info .spot-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 10rpx;
+}
+.spots-section .spots-list .spot-item .spot-content .spot-info .spot-date, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-address, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-price {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #666666;
+  margin-bottom: 10rpx;
+}
+.spots-section .spots-list .spot-item .spot-content .spot-info .spot-date text, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-address text, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-price text {
+  margin-left: 6rpx;
+}
+.spots-section .spots-list .spot-item .spot-notes {
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+}
+.spots-section .spots-list .spot-item .spot-notes .notes-label {
+  color: #999999;
+}
+.spots-section .spots-list .spot-item .spot-notes .notes-content {
+  color: #666666;
+}
+.spots-section .empty-spots {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 50rpx 0;
+}
+.spots-section .empty-spots .empty-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 30rpx;
+}
+.spots-section .empty-spots text {
+  font-size: 28rpx;
+  color: #999999;
+  margin-bottom: 30rpx;
+}
+.spots-section .empty-spots .add-btn {
+  width: 300rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  color: #ffffff;
+  background-color: #007AFF;
+}

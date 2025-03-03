@@ -5,15 +5,25 @@ const favoriteCollection = db.collection('travel-favorites')
 
 exports.main = async (event, context) => {
 	const {
-		spotId // 景点ID
+		spotId, // 景点ID
+		planId, // 旅行计划ID
+		type // 收藏类型：spot或plan
 	} = event
 	
-	if (!spotId) {
+	if (!type || (type !== 'spot' && type !== 'plan')) {
 		return {
 			code: -1,
-			message: '景点ID不能为空'
+			message: '收藏类型不正确'
 		}
 	}
+
+	if ((type === 'spot' && !spotId) || (type === 'plan' && !planId)) {
+		return {
+			code: -1,
+			message: '参数不能为空'
+		}
+	}
+
 	console.log(context)
 	console.log(event)
 	const uid = event.uid
@@ -28,7 +38,8 @@ exports.main = async (event, context) => {
 		// 查询是否已收藏
 		const favoriteResult = await favoriteCollection.where({
 			user_id: uid,
-			spot_id: spotId
+			type: type,
+			...(type === 'spot' ? { spot_id: spotId } : { plan_id: planId })
 		}).get()
 		
 		// 如果已收藏，则取消收藏
@@ -46,8 +57,9 @@ exports.main = async (event, context) => {
 		// 如果未收藏，则添加收藏
 		await favoriteCollection.add({
 			user_id: uid,
-			spot_id: spotId,
-			create_date: new Date()
+			type: type,
+			...(type === 'spot' ? { spot_id: spotId } : { plan_id: planId }),
+			create_date: Date.now()
 		})
 
 		return {

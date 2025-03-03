@@ -1,40 +1,60 @@
 'use strict';
-const db = uniCloud.database()
-exports.main = async (event, context) => {
-	//event为客户端上传的参数
-	console.log('event : ', event)
 
-	const {
-		spotId // 景点ID
-	} = event
+/**
+ * 获取收藏状态云函数
+ * @param {Object} event
+ * @param {string} event.uid - 用户ID
+ * @param {string} event.type - 收藏类型：spot或plan
+ * @param {string} [event.spotId] - 景点ID（type为spot时必填）
+ * @param {string} [event.planId] - 计划ID（type为plan时必填）
+ */
+exports.main = async (event, context) => {
+	const db = uniCloud.database();
+	const collection = db.collection('travel-favorites');
 	
-	if (!spotId) {
-		return {
-			code: -1,
-			message: '景点ID不能为空'
-		}
-	}
+	const { uid, type, spotId, planId } = event;
 	
-	const uid = event.uid
+	// 参数校验
 	if (!uid) {
 		return {
-			code: -2,
+			code: -1,
 			message: '请先登录'
-		}
-	}	
+		};
+	}
 	
-	const collection = db.collection('travel-favorites')
-	const favoriteResult = await collection.where({
-		user_id: uid,
-		spot_id: spotId
-	}).get()
+	if (!type || (type !== 'spot' && type !== 'plan')) {
+		return {
+			code: -1,
+			message: '收藏类型不正确'
+		};
+	}
 	
-	//返回数据给客户端
-	return {
-		code: 0,
-		message: '获取成功',
-		data: {
-			isFavorite: favoriteResult.data.length > 0
-		}
+	if ((type === 'spot' && !spotId) || (type === 'plan' && !planId)) {
+		return {
+			code: -1,
+			message: '参数不能为空'
+		};
+	}
+	
+	try {
+		// 查询是否已收藏
+		const result = await collection.where({
+			user_id: uid,
+			type: type,
+			...(type === 'spot' ? { spot_id: spotId } : { plan_id: planId })
+		}).get();
+		
+		return {
+			code: 0,
+			message: '获取成功',
+			data: {
+				isFavorite: result.data.length > 0
+			}
+		};
+	} catch (e) {
+		return {
+			code: -2,
+			message: e.message || '获取失败'
+		};
 	}
 };
