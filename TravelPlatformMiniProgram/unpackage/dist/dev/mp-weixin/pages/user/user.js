@@ -24,7 +24,7 @@ const _sfc_main = {
       this.isLogin = !!token;
       if (this.isLogin) {
         this.userInfo = common_vendor.index.getStorageSync("userInfo");
-        common_vendor.index.__f__("log", "at pages/user/user.vue:99", this.userInfo);
+        common_vendor.index.__f__("log", "at pages/user/user.vue:98", this.userInfo);
       } else {
         this.userInfo = {
           avatar: "/static/avatar/default-avatar.png",
@@ -126,17 +126,16 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   } : {
     d: $data.userInfo.avatar,
     e: common_vendor.o((...args) => $options.goToAvatar && $options.goToAvatar(...args)),
-    f: common_vendor.t($data.userInfo.username),
-    g: common_vendor.t($data.userInfo.id)
+    f: common_vendor.t($data.userInfo.username)
   }, {
-    h: common_vendor.o((...args) => $options.goToProfile && $options.goToProfile(...args)),
-    i: common_vendor.o((...args) => $options.goToFavorites && $options.goToFavorites(...args)),
-    j: common_vendor.o((...args) => $options.goToPlans && $options.goToPlans(...args)),
-    k: common_vendor.o((...args) => $options.goToSettings && $options.goToSettings(...args)),
-    l: common_vendor.o((...args) => $options.goToAbout && $options.goToAbout(...args)),
-    m: $data.isLogin
+    g: common_vendor.o((...args) => $options.goToProfile && $options.goToProfile(...args)),
+    h: common_vendor.o((...args) => $options.goToFavorites && $options.goToFavorites(...args)),
+    i: common_vendor.o((...args) => $options.goToPlans && $options.goToPlans(...args)),
+    j: common_vendor.o((...args) => $options.goToSettings && $options.goToSettings(...args)),
+    k: common_vendor.o((...args) => $options.goToAbout && $options.goToAbout(...args)),
+    l: $data.isLogin
   }, $data.isLogin ? {
-    n: common_vendor.o((...args) => $options.logout && $options.logout(...args))
+    m: common_vendor.o((...args) => $options.logout && $options.logout(...args))
   } : {});
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

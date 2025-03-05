@@ -17,7 +17,8 @@ const _sfc_main = {
       statusOptions: ["计划中", "进行中", "已完成"],
       currentSpotIndex: -1,
       currentDateIndex: -1,
-      currentSpotNotes: ""
+      currentSpotNotes: "",
+      quickNotes: ["必去景点", "特色美食", "交通便利", "性价比高", "适合拍照", "人少清净", "带孩子必去", "情侣约会", "早上去最佳", "傍晚去最佳"]
     };
   },
   onLoad(options) {
@@ -66,7 +67,7 @@ const _sfc_main = {
           }, 1500);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-edit.vue:212", "获取计划详情失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-edit.vue:252", "获取计划详情失败", e);
         common_vendor.index.showToast({
           title: "获取计划详情失败，请稍后重试",
           icon: "none"
@@ -112,18 +113,33 @@ const _sfc_main = {
       try {
         const app = getApp();
         const userId = app.globalData.getUserId();
+        common_vendor.index.__f__("log", "at pages/plans/plan-edit.vue:305", "userId", userId);
         const action = this.isEdit ? "update" : "create";
-        const data = {
+        const spots = this.planData.spots ? this.planData.spots.map((spot) => ({
+          spot_id: spot.spot_id,
+          visit_date: spot.visit_date,
+          notes: spot.notes || ""
+        })) : [];
+        const requestData = {
           action,
-          plan: { ...this.planData },
+          plan: {
+            title: this.planData.title || "",
+            description: this.planData.description || "",
+            start_date: this.planData.start_date,
+            end_date: this.planData.end_date,
+            spots,
+            is_public: this.planData.is_public || false,
+            status: this.planData.status || 0
+          },
           user_id: userId
         };
         if (this.isEdit) {
-          data.plan_id = this.planId;
+          requestData.plan_id = this.planId;
         }
+        common_vendor.index.__f__("log", "at pages/plans/plan-edit.vue:334", "发送到云函数的数据：", JSON.parse(JSON.stringify(requestData)));
         const res = await common_vendor.er.callFunction({
           name: "manage-plans",
-          data
+          data: JSON.parse(JSON.stringify(requestData))
         });
         if (res.result.code === 0) {
           common_vendor.index.showToast({
@@ -144,7 +160,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-edit.vue:306", this.isEdit ? "更新计划失败" : "创建计划失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-edit.vue:365", this.isEdit ? "更新计划失败" : "创建计划失败", e);
         common_vendor.index.showToast({
           title: (this.isEdit ? "更新" : "创建") + "失败，请稍后重试",
           icon: "none"
@@ -265,9 +281,11 @@ const _sfc_main = {
       });
     },
     /**
-     * 编辑景点备注
+     * 打开备注弹窗
+     * @param {Number} dateIndex 日期组索引
+     * @param {Number} spotIndex 景点索引
      */
-    editSpotNotes(dateIndex, spotIndex) {
+    openNotesPopup(dateIndex, spotIndex) {
       this.currentDateIndex = dateIndex;
       this.currentSpotIndex = spotIndex;
       const spot = this.groupedSpots[dateIndex].spots[spotIndex];
@@ -275,18 +293,31 @@ const _sfc_main = {
       this.$refs.notesPopup.open();
     },
     /**
-     * 确认景点备注
+     * 添加快速备注标签
+     * @param {String} tag 标签文本
      */
-    confirmSpotNotes(value) {
+    addQuickNote(tag) {
+      if (!this.currentSpotNotes) {
+        this.currentSpotNotes = tag;
+      } else if (!this.currentSpotNotes.includes(tag)) {
+        this.currentSpotNotes += "，" + tag;
+      }
+    },
+    /**
+     * 确认修改备注
+     */
+    confirmNotes() {
       if (this.currentDateIndex >= 0 && this.currentSpotIndex >= 0) {
         const spot = this.groupedSpots[this.currentDateIndex].spots[this.currentSpotIndex];
-        const spotIndex = this.planData.spots.findIndex(
+        const index = this.planData.spots.findIndex(
           (s) => s.spot_id === spot.spot_id && s.visit_date === spot.visit_date
         );
-        if (spotIndex >= 0) {
-          this.planData.spots[spotIndex].notes = value;
+        if (index >= 0) {
+          this.planData.spots[index].notes = this.currentSpotNotes;
         }
       }
+      common_vendor.index.__f__("log", "at pages/plans/plan-edit.vue:555", "景点备注：", this.currentSpotNotes);
+      common_vendor.index.__f__("log", "at pages/plans/plan-edit.vue:556", "this.planData", this.planData);
       this.closeNotesPopup();
     },
     /**
@@ -362,13 +393,13 @@ const _sfc_main = {
 };
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _component_uni_popup_dialog = common_vendor.resolveComponent("uni-popup-dialog");
-  const _component_uni_popup = common_vendor.resolveComponent("uni-popup");
-  (_easycom_uni_icons2 + _component_uni_popup_dialog + _component_uni_popup)();
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_easycom_uni_icons2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_uni_popup)();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
@@ -402,48 +433,68 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     p: common_vendor.o((...args) => $options.navigateToSpotSelect && $options.navigateToSpotSelect(...args)),
     q: $data.planData.spots && $data.planData.spots.length > 0
   }, $data.planData.spots && $data.planData.spots.length > 0 ? {
-    r: common_vendor.f($options.groupedSpots, (date, dateIndex, i0) => {
+    r: common_vendor.f($options.groupedSpots, (dateGroup, dateIndex, i0) => {
       return {
-        a: common_vendor.t($options.formatDate(date.date)),
-        b: common_vendor.t(date.spots.length),
-        c: common_vendor.f(date.spots, (spot, spotIndex, i1) => {
-          return {
-            a: common_vendor.t(spot.spot_detail ? spot.spot_detail.name : "未知景点"),
-            b: common_vendor.t(spotIndex + 1),
-            c: "4e4c1b18-3-" + i0 + "-" + i1,
-            d: common_vendor.o(($event) => $options.editSpotNotes(dateIndex, spotIndex), spotIndex),
+        a: common_vendor.t($options.formatDate(dateGroup.date)),
+        b: common_vendor.t(dateGroup.spots.length),
+        c: common_vendor.f(dateGroup.spots, (spot, spotIndex, i1) => {
+          return common_vendor.e({
+            a: common_vendor.t(spot.spot_detail.name),
+            b: "4e4c1b18-3-" + i0 + "-" + i1,
+            c: common_vendor.t($options.formatDate(spot.visit_date)),
+            d: spot.notes
+          }, spot.notes ? {
             e: "4e4c1b18-4-" + i0 + "-" + i1,
-            f: common_vendor.o(($event) => $options.removeSpot(dateIndex, spotIndex), spotIndex),
-            g: spotIndex
-          };
+            f: common_vendor.p({
+              type: "paperplane",
+              size: "14",
+              color: "#2B9939"
+            }),
+            g: common_vendor.t(spot.notes)
+          } : {}, {
+            h: "4e4c1b18-5-" + i0 + "-" + i1,
+            i: common_vendor.o(($event) => $options.openNotesPopup(dateIndex, spotIndex), spotIndex),
+            j: "4e4c1b18-6-" + i0 + "-" + i1,
+            k: common_vendor.o(($event) => $options.removeSpot(dateIndex, spotIndex), spotIndex),
+            l: spotIndex
+          });
         }),
-        d: date.date
+        d: dateGroup.date
       };
     }),
     s: common_vendor.p({
-      type: "compose",
-      size: "16",
-      color: "#007AFF"
+      type: "calendar",
+      size: "14",
+      color: "#999999"
     }),
     t: common_vendor.p({
+      type: "compose",
+      size: "18",
+      color: "#007AFF"
+    }),
+    v: common_vendor.p({
       type: "trash",
-      size: "16",
+      size: "18",
       color: "#FF3B30"
     })
   } : {}, {
-    v: common_vendor.o((...args) => $options.navigateBack && $options.navigateBack(...args)),
-    w: common_vendor.o((...args) => $options.savePlan && $options.savePlan(...args)),
-    x: common_vendor.o($options.confirmSpotNotes),
-    y: common_vendor.o($options.closeNotesPopup),
-    z: common_vendor.p({
-      mode: "input",
-      title: "景点备注",
-      placeholder: "请输入景点游览备注",
-      value: $data.currentSpotNotes
+    w: common_vendor.o((...args) => $options.navigateBack && $options.navigateBack(...args)),
+    x: common_vendor.o((...args) => $options.savePlan && $options.savePlan(...args)),
+    y: $data.currentSpotNotes,
+    z: common_vendor.o(($event) => $data.currentSpotNotes = $event.detail.value),
+    A: common_vendor.t($data.currentSpotNotes.length),
+    B: common_vendor.f($data.quickNotes, (tag, index, i0) => {
+      return {
+        a: common_vendor.t(tag),
+        b: index,
+        c: common_vendor.o(($event) => $options.addQuickNote(tag), index)
+      };
     }),
-    A: common_vendor.sr("notesPopup", "4e4c1b18-5"),
-    B: common_vendor.p({
-      type: "dialog"
+    C: common_vendor.o((...args) => $options.closeNotesPopup && $options.closeNotesPopup(...args)),
+    D: common_vendor.o((...args) => $options.confirmNotes && $options.confirmNotes(...args)),
+    E: common_vendor.sr("notesPopup", "4e4c1b18-7"),
+    F: common_vendor.p({
+      type: "bottom"
     })
   });
 }

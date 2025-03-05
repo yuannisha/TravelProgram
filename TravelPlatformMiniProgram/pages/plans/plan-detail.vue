@@ -65,50 +65,54 @@
 				
 				<view v-if="planData.spots && planData.spots.length > 0" class="spots-list">
 					<view 
-						v-for="(spot, index) in planData.spots" 
-						:key="index" 
-						class="spot-item"
-						@click="navigateToSpotDetail(spot.spot_id)"
+						v-for="(dateGroup, dateIndex) in groupedSpots" 
+						:key="dateIndex" 
+						class="date-group"
 					>
-						<view class="spot-day">第{{ index + 1 }}天</view>
-						
-						<view class="spot-content">
-							<image 
-								v-if="spot.spot_detail && spot.spot_detail.imageUrl" 
-								:src="spot.spot_detail.imageUrl" 
-								mode="aspectFill" 
-								class="spot-image"
-							></image>
-							<image 
-								v-else 
-								src="/static/spots/default.jpg" 
-								mode="aspectFill" 
-								class="spot-image"
-							></image>
-							
-							<view class="spot-info">
-								<view class="spot-name">{{ spot.spot_detail ? spot.spot_detail.name : '未知景点' }}</view>
-								
-								<view class="spot-date">
-									<uni-icons type="calendar" size="14" color="#666"></uni-icons>
-									<text>{{ formatDate(spot.visit_date) }}</text>
-								</view>
-								
-								<view class="spot-address" v-if="spot.spot_detail && spot.spot_detail.address">
-									<uni-icons type="location" size="14" color="#666"></uni-icons>
-									<text>{{ spot.spot_detail.address }}</text>
-								</view>
-								
-								<view class="spot-price" v-if="spot.spot_detail && spot.spot_detail.price !== undefined">
-									<uni-icons type="rmb" size="14" color="#666"></uni-icons>
-									<text>{{ formatPrice(spot.spot_detail.price) }}</text>
-								</view>
-							</view>
+						<view class="date-header">
+							<text class="day-number">第{{ dateGroup.dayNumber }}天</text>
+							<text class="date-text">{{ formatDate(dateGroup.date) }}</text>
 						</view>
 						
-						<view class="spot-notes" v-if="spot.notes">
-							<text class="notes-label">备注：</text>
-							<text class="notes-content">{{ spot.notes }}</text>
+						<view 
+							v-for="(spot, spotIndex) in dateGroup.spots" 
+							:key="spotIndex" 
+							class="spot-item"
+							@click="navigateToSpotDetail(spot.spot_id)"
+						>
+							<view class="spot-content">
+								<image 
+									v-if="spot.spot_detail && spot.spot_detail.imageUrl" 
+									:src="spot.spot_detail.imageUrl" 
+									mode="aspectFill" 
+									class="spot-image"
+								></image>
+								<image 
+									v-else 
+									src="/static/spots/default.jpg" 
+									mode="aspectFill" 
+									class="spot-image"
+								></image>
+								
+								<view class="spot-info">
+									<view class="spot-name">{{ spot.spot_detail ? spot.spot_detail.name : '未知景点' }}</view>
+									
+									<view class="spot-address" v-if="spot.spot_detail && spot.spot_detail.address">
+										<uni-icons type="location" size="14" color="#666"></uni-icons>
+										<text>{{ spot.spot_detail.address }}</text>
+									</view>
+									
+									<view class="spot-price" v-if="spot.spot_detail && spot.spot_detail.price !== undefined">
+										<uni-icons type="rmb" size="14" color="#666"></uni-icons>
+										<text>{{ formatPrice(spot.spot_detail.price) }}</text>
+									</view>
+								</view>
+							</view>
+							
+							<view class="spot-notes" v-if="spot.notes">
+								<text class="notes-label">备注：</text>
+								<text class="notes-content">{{ spot.notes }}</text>
+							</view>
 						</view>
 					</view>
 				</view>
@@ -535,6 +539,60 @@
 			formatPrice(price) {
 				if (price === undefined || price === null) return '';
 				return '¥' + (price / 100).toFixed(2);
+			},
+			
+			/**
+			 * 获取景点的游览天数
+			 * @param {Object} spot 景点对象
+			 * @return {Number} 游览天数（从计划开始日期算起的第几天）
+			 */
+			getVisitDay(spot) {
+				if (!spot || !spot.visit_date || !this.planData.start_date) return 1;
+				
+				// 获取日期字符串，不考虑时间部分
+				const visitDateStr = this.formatDate(spot.visit_date);
+				const startDateStr = this.formatDate(this.planData.start_date);
+				
+				// 如果日期字符串相同，说明是第一天
+				if (visitDateStr === startDateStr) return 1;
+				
+				// 计算日期差值
+				const visitDate = new Date(visitDateStr);
+				const startDate = new Date(startDateStr);
+				const diffTime = visitDate.getTime() - startDate.getTime();
+				const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+				
+				return diffDays + 1; // 加1是因为从第一天开始计数
+			}
+		},
+		computed: {
+			/**
+			 * 按日期分组后的景点列表
+			 */
+			groupedSpots() {
+				if (!this.planData.spots || !this.planData.spots.length) {
+					return [];
+				}
+				
+				// 创建一个按游览日期分组的对象
+				const groupsByDate = {};
+				
+				// 按日期对景点进行分组
+				this.planData.spots.forEach(spot => {
+					const dateKey = this.formatDate(spot.visit_date);
+					if (!groupsByDate[dateKey]) {
+						const dayNumber = this.getVisitDay(spot);
+						groupsByDate[dateKey] = {
+							date: spot.visit_date,
+							dayNumber: dayNumber,
+							spots: []
+						};
+					}
+					groupsByDate[dateKey].spots.push(spot);
+				});
+				
+				// 将分组对象转换为数组并按日期排序
+				return Object.values(groupsByDate).sort((a, b) => a.date - b.date);
 			}
 		},
 		// 监听页面返回
@@ -696,77 +754,90 @@
 		}
 		
 		.spots-list {
-			.spot-item {
-				position: relative;
-				margin-bottom: 40rpx;
-				padding-bottom: 30rpx;
-				border-bottom: 1rpx dashed #f0f0f0;
+			.date-group {
+				margin-bottom: 30rpx;
 				
-				&:last-child {
-					margin-bottom: 0;
-					padding-bottom: 0;
-					border-bottom: none;
-				}
-				
-				.spot-day {
-					position: absolute;
-					top: 0;
-					left: 0;
-					padding: 6rpx 20rpx;
-					background-color: rgba(0, 122, 255, 0.8);
-					color: #ffffff;
-					font-size: 24rpx;
-					border-radius: 10rpx 0 10rpx 0;
-					z-index: 1;
-				}
-				
-				.spot-content {
+				.date-header {
 					display: flex;
+					align-items: center;
+					padding: 10rpx 0;
 					margin-bottom: 20rpx;
+					border-bottom: 1rpx solid #f0f0f0;
 					
-					.spot-image {
-						width: 200rpx;
-						height: 150rpx;
-						border-radius: 10rpx;
-						margin-right: 20rpx;
+					.day-number {
+						padding: 6rpx 16rpx;
+						background-color: rgba(0, 122, 255, 0.8);
+						color: #ffffff;
+						font-size: 24rpx;
+						border-radius: 6rpx;
+						margin-right: 16rpx;
 					}
 					
-					.spot-info {
-						flex: 1;
+					.date-text {
+						font-size: 26rpx;
+						color: #666666;
+					}
+				}
+			
+				.spot-item {
+					margin-bottom: 30rpx;
+					padding-bottom: 20rpx;
+					border-bottom: 1rpx dashed #f0f0f0;
+					
+					&:last-child {
+						margin-bottom: 0;
+						padding-bottom: 0;
+						border-bottom: none;
+					}
+					
+					.spot-content {
+						display: flex;
+						margin-bottom: 20rpx;
 						
-						.spot-name {
-							font-size: 30rpx;
-							font-weight: bold;
-							color: #333333;
-							margin-bottom: 10rpx;
+						.spot-image {
+							width: 200rpx;
+							height: 150rpx;
+							border-radius: 10rpx;
+							margin-right: 20rpx;
 						}
 						
-						.spot-date, .spot-address, .spot-price {
-							display: flex;
-							align-items: center;
-							font-size: 24rpx;
-							color: #666666;
-							margin-bottom: 10rpx;
+						.spot-info {
+							flex: 1;
 							
-							text {
-								margin-left: 6rpx;
+							.spot-name {
+								font-size: 30rpx;
+								font-weight: bold;
+								color: #333333;
+								margin-bottom: 10rpx;
+							}
+							
+							.spot-date, .spot-address, .spot-price {
+								display: flex;
+								align-items: center;
+								font-size: 24rpx;
+								color: #666666;
+								margin-bottom: 10rpx;
+								
+								text {
+									margin-left: 6rpx;
+								}
 							}
 						}
 					}
-				}
-				
-				.spot-notes {
-					background-color: #f9f9f9;
-					padding: 20rpx;
-					border-radius: 10rpx;
-					font-size: 26rpx;
 					
-					.notes-label {
-						color: #999999;
-					}
-					
-					.notes-content {
-						color: #666666;
+					.spot-notes {
+						background-color: #f9f9f9;
+						padding: 20rpx;
+						border-radius: 10rpx;
+						font-size: 26rpx;
+						
+						.notes-label {
+							color: #999999;
+						}
+						
+						.notes-content {
+							color: #666666;
+						}
 					}
 				}
 			}

@@ -42,18 +42,24 @@ const _sfc_main = {
           }
         });
         if (res.result.code === 0) {
-          const { list, total } = res.result.data;
+          const { list, total, deleted_count } = res.result.data;
+          if (deleted_count > 0) {
+            common_vendor.index.showToast({
+              title: `${deleted_count}个${this.activeTab === "spot" ? "景点" : "旅行计划"}已被删除`,
+              icon: "none",
+              duration: 2e3
+            });
+          }
           if (this.page === 1) {
             this.favoriteList = list;
-            common_vendor.index.__f__("log", "at pages/user/favorites.vue:201", "this.favoriteList", this.favoriteList);
+            common_vendor.index.__f__("log", "at pages/user/favorites.vue:224", "this.favoriteList", this.favoriteList);
           } else {
             this.favoriteList = [...this.favoriteList, ...list];
-            common_vendor.index.__f__("log", "at pages/user/favorites.vue:204", "this.favoriteList", this.favoriteList);
           }
           this.noMore = this.favoriteList.length >= total;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/user/favorites.vue:210", "获取收藏列表失败:", e);
+        common_vendor.index.__f__("error", "at pages/user/favorites.vue:232", "获取收藏列表失败:", e);
         common_vendor.index.showToast({
           title: "获取收藏列表失败",
           icon: "none"
@@ -63,9 +69,10 @@ const _sfc_main = {
     },
     // 取消收藏
     async cancelFavorite(item, index) {
+      const message = item.is_deleted ? `确定要移除该${this.activeTab === "spot" ? "景点" : "旅行计划"}吗？` : `确定要取消收藏该${this.activeTab === "spot" ? "景点" : "旅行计划"}吗？`;
       common_vendor.index.showModal({
         title: "提示",
-        content: `确定要取消收藏该${this.activeTab === "spot" ? "景点" : "旅行计划"}吗？`,
+        content: message,
         success: async (res) => {
           if (res.confirm) {
             try {
@@ -74,19 +81,19 @@ const _sfc_main = {
                 name: "toggle-favorite",
                 data: {
                   type: this.activeTab,
-                  ...this.activeTab === "spot" ? { spotId: item.detail._id } : { planId: item.detail._id },
+                  ...this.activeTab === "spot" ? { spotId: item.spot_id } : { planId: item.plan_id },
                   uid: uid.id
                 }
               });
               if (res2.result.code === 0) {
                 this.favoriteList.splice(index, 1);
                 common_vendor.index.showToast({
-                  title: "已取消收藏",
+                  title: item.is_deleted ? "已移除" : "已取消收藏",
                   icon: "none"
                 });
               }
             } catch (e) {
-              common_vendor.index.__f__("error", "at pages/user/favorites.vue:249", "取消收藏失败:", e);
+              common_vendor.index.__f__("error", "at pages/user/favorites.vue:275", "操作失败:", e);
               common_vendor.index.showToast({
                 title: "操作失败",
                 icon: "none"
@@ -119,7 +126,7 @@ const _sfc_main = {
           if (res.tapIndex === 0)
             ;
           else {
-            const path = this.activeTab === "spot" ? `/pages/spots/detail?id=${item.detail._id}` : `/pages/plans/plan-detail?id=${item.detail._id}`;
+            const path = this.activeTab === "spot" ? `/pages/spots/detail?id=${item.spot_id}` : `/pages/plans/plan-detail?id=${item.plan_id}`;
             common_vendor.index.setClipboardData({
               data: `https://example.com${path}`,
               success: () => {
@@ -135,10 +142,10 @@ const _sfc_main = {
     },
     // 跳转到详情页
     goToDetail(item) {
-      const path = this.activeTab === "spot" ? `/pages/spots/detail?id=${item.detail._id}` : `/pages/plans/plan-detail?id=${item.detail._id}`;
-      common_vendor.index.navigateTo({
-        url: path
-      });
+      if (item.is_deleted)
+        return;
+      const url = this.activeTab === "spot" ? `/pages/spots/detail?id=${item.spot_id}` : `/pages/plans/plan-detail?id=${item.plan_id}`;
+      common_vendor.index.navigateTo({ url });
     },
     // 跳转到列表页
     goToList() {
@@ -210,113 +217,135 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, $data.activeTab === "spot" ? {
     k: common_vendor.f($data.favoriteList, (item, index, i0) => {
       return common_vendor.e({
-        a: item.detail.imageUrl,
-        b: common_vendor.t(item.detail.name),
-        c: "dea029d8-0-" + i0,
-        d: common_vendor.t(item.detail.rating),
-        e: item.detail.address
+        a: item.is_deleted
+      }, item.is_deleted ? {
+        b: "dea029d8-0-" + i0,
+        c: common_vendor.p({
+          type: "info",
+          size: "20",
+          color: "#999"
+        }),
+        d: common_vendor.o(($event) => $options.cancelFavorite(item, index), index)
+      } : common_vendor.e({
+        e: item.detail.imageUrl,
+        f: common_vendor.t(item.detail.name),
+        g: "dea029d8-1-" + i0,
+        h: common_vendor.p({
+          type: "star-filled",
+          size: "14",
+          color: "#ff9500"
+        }),
+        i: common_vendor.t(item.detail.rating),
+        j: item.detail.address
       }, item.detail.address ? {
-        f: "dea029d8-1-" + i0,
-        g: common_vendor.p({
+        k: "dea029d8-2-" + i0,
+        l: common_vendor.p({
           type: "location",
           size: "14",
           color: "#666"
         }),
-        h: common_vendor.t(item.detail.address)
+        m: common_vendor.t(item.detail.address)
       } : {}, {
-        i: item.detail.tags && item.detail.tags.length > 0
+        n: item.detail.tags && item.detail.tags.length > 0
       }, item.detail.tags && item.detail.tags.length > 0 ? {
-        j: common_vendor.f(item.detail.tags, (tag, tagIndex, i1) => {
+        o: common_vendor.f(item.detail.tags, (tag, tagIndex, i1) => {
           return {
             a: common_vendor.t(tag),
             b: tagIndex
           };
         })
       } : {}, {
-        k: common_vendor.t(item.detail.price / 100),
-        l: common_vendor.t($options.formatDate(item.create_date)),
-        m: common_vendor.o(($event) => $options.goToDetail(item), index),
-        n: "dea029d8-2-" + i0,
-        o: common_vendor.o(($event) => $options.cancelFavorite(item, index), index),
-        p: "dea029d8-3-" + i0,
-        q: common_vendor.o(($event) => $options.share(item), index),
-        r: index
+        p: common_vendor.t(item.detail.price / 100),
+        q: common_vendor.t($options.formatDate(item.create_date)),
+        r: common_vendor.o(($event) => $options.goToDetail(item), index)
+      }), {
+        s: "dea029d8-3-" + i0,
+        t: common_vendor.o(($event) => $options.cancelFavorite(item, index), index),
+        v: "dea029d8-4-" + i0,
+        w: common_vendor.o(($event) => $options.share(item), index),
+        x: index
       });
     }),
     l: common_vendor.p({
-      type: "star-filled",
-      size: "14",
-      color: "#ff9500"
-    }),
-    m: common_vendor.p({
       type: "trash",
       size: "16",
       color: "#666"
     }),
-    n: common_vendor.p({
+    m: common_vendor.p({
       type: "redo",
       size: "16",
       color: "#666"
     })
   } : {
-    o: common_vendor.f($data.favoriteList, (item, index, i0) => {
+    n: common_vendor.f($data.favoriteList, (item, index, i0) => {
       var _a, _b;
       return common_vendor.e({
-        a: ((_a = item.detail.user_info) == null ? void 0 : _a.avatar) || "/static/default-avatar.png",
-        b: common_vendor.t(((_b = item.detail.user_info) == null ? void 0 : _b.username) || "用户"),
-        c: common_vendor.t($options.formatDate(item.create_date)),
-        d: common_vendor.t(item.detail.title),
-        e: common_vendor.t($options.getStatusText(item.detail.status)),
-        f: common_vendor.n($options.getStatusClass(item.detail.status)),
-        g: "dea029d8-4-" + i0,
-        h: common_vendor.t($options.formatDate(item.detail.start_date)),
-        i: common_vendor.t($options.formatDate(item.detail.end_date)),
-        j: item.detail.description
+        a: item.is_deleted
+      }, item.is_deleted ? {
+        b: "dea029d8-5-" + i0,
+        c: common_vendor.p({
+          type: "info",
+          size: "20",
+          color: "#999"
+        }),
+        d: common_vendor.o(($event) => $options.cancelFavorite(item, index), index)
+      } : common_vendor.e({
+        e: ((_a = item.detail.user_info) == null ? void 0 : _a.avatar) || "/static/default-avatar.png",
+        f: common_vendor.t(((_b = item.detail.user_info) == null ? void 0 : _b.username) || "用户"),
+        g: common_vendor.t($options.formatDate(item.create_date)),
+        h: common_vendor.t(item.detail.title),
+        i: common_vendor.t($options.getStatusText(item.detail.status)),
+        j: common_vendor.n($options.getStatusClass(item.detail.status)),
+        k: "dea029d8-6-" + i0,
+        l: common_vendor.p({
+          type: "calendar",
+          size: "16",
+          color: "#666"
+        }),
+        m: common_vendor.t($options.formatDate(item.detail.start_date)),
+        n: common_vendor.t($options.formatDate(item.detail.end_date)),
+        o: item.detail.description
       }, item.detail.description ? {
-        k: common_vendor.t(item.detail.description)
+        p: common_vendor.t(item.detail.description)
       } : {}, {
-        l: item.detail.spots && item.detail.spots.length > 0
+        q: item.detail.spots && item.detail.spots.length > 0
       }, item.detail.spots && item.detail.spots.length > 0 ? {
-        m: "dea029d8-5-" + i0,
-        n: common_vendor.p({
+        r: "dea029d8-7-" + i0,
+        s: common_vendor.p({
           type: "location",
           size: "16",
           color: "#666"
         }),
-        o: common_vendor.t(item.detail.spots.length),
-        p: common_vendor.t($options.getDuration(item.detail.start_date, item.detail.end_date))
+        t: common_vendor.t(item.detail.spots.length),
+        v: common_vendor.t($options.getDuration(item.detail.start_date, item.detail.end_date))
       } : {}, {
-        q: common_vendor.o(($event) => $options.goToDetail(item), index),
-        r: "dea029d8-6-" + i0,
-        s: common_vendor.o(($event) => $options.cancelFavorite(item, index), index),
-        t: "dea029d8-7-" + i0,
-        v: common_vendor.o(($event) => $options.share(item), index),
-        w: index
+        w: common_vendor.o(($event) => $options.goToDetail(item), index)
+      }), {
+        x: "dea029d8-8-" + i0,
+        y: common_vendor.o(($event) => $options.cancelFavorite(item, index), index),
+        z: "dea029d8-9-" + i0,
+        A: common_vendor.o(($event) => $options.share(item), index),
+        B: index
       });
     }),
-    p: common_vendor.p({
-      type: "calendar",
-      size: "16",
-      color: "#666"
-    }),
-    q: common_vendor.p({
+    o: common_vendor.p({
       type: "trash",
       size: "16",
       color: "#666"
     }),
-    r: common_vendor.p({
+    p: common_vendor.p({
       type: "redo",
       size: "16",
       color: "#666"
     })
   }, {
-    s: $data.loading
+    q: $data.loading
   }, $data.loading ? {} : {}, {
-    t: $data.noMore
+    r: $data.noMore
   }, $data.noMore ? {} : {}, {
-    v: common_vendor.o((...args) => $options.loadMore && $options.loadMore(...args)),
-    w: $data.isRefreshing,
-    x: common_vendor.o((...args) => $options.refresh && $options.refresh(...args))
+    s: common_vendor.o((...args) => $options.loadMore && $options.loadMore(...args)),
+    t: $data.isRefreshing,
+    v: common_vendor.o((...args) => $options.refresh && $options.refresh(...args))
   }));
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

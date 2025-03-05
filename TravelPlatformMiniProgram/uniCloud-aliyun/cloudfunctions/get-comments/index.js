@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * 获取景点评论列表
+ * 获取评论列表
  * @param {String} spotId - 景点ID
  * @param {Number} page - 页码
  * @param {Number} pageSize - 每页数量

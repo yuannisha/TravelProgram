@@ -1,5 +1,11 @@
 'use strict';
 const db = uniCloud.database()
+
+/**
+ * 根据ID获取景点详情
+ * @param {String} id - 景点ID
+ * @returns {Object} 返回景点信息
+ */
 exports.main = async (event, context) => {
 	//event为客户端上传的参数
 	console.log('event : ', event)

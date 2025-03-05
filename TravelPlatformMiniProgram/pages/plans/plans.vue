@@ -3,7 +3,7 @@
 		<view class="header">
 			<view class="title">我的旅行计划</view>
 			<view class="add-btn" @click="navigateToCreate">
-				<uni-icons type="plusempty" size="20" color="#FFFFFF">添加</uni-icons>
+				<uni-icons type="plusempty" size="20" color="#FFFFFF"></uni-icons>
 			</view>
 		</view>
 		
@@ -436,7 +436,7 @@
 		.create-btn {
 			width: 300rpx;
 			height: 80rpx;
-			line-height: 80rpx;
+			line-height: 60rpx;
 			border-radius: 40rpx;
 			font-size: 30rpx;
 			color: #ffffff;

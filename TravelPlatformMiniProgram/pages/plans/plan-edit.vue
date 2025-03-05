@@ -72,33 +72,44 @@
 				
 				<view v-if="planData.spots && planData.spots.length > 0" class="spots-list">
 					<view 
-						v-for="(date, dateIndex) in groupedSpots" 
-						:key="date.date" 
+						v-for="(dateGroup, dateIndex) in groupedSpots" 
+						:key="dateGroup.date"
 						class="date-group"
 					>
 						<view class="date-header">
-							<text>{{formatDate(date.date)}}</text>
-							<text class="spot-count">({{date.spots.length}}个景点)</text>
+							<text>{{formatDate(dateGroup.date)}}</text>
+							<text class="spot-count">（{{dateGroup.spots.length}}个景点）</text>
 						</view>
+						
 						<view 
-							v-for="(spot, spotIndex) in date.spots" 
-							:key="spotIndex" 
+							v-for="(spot, spotIndex) in dateGroup.spots" 
+							:key="spotIndex"
 							class="spot-item"
 						>
 							<view class="spot-info">
-								<text class="spot-name">{{ spot.spot_detail ? spot.spot_detail.name : '未知景点' }}</text>
+								<text class="spot-name">{{spot.spot_detail.name}}</text>
 								<view class="spot-date">
-									<text>游览顺序：</text>
-									<text>{{spotIndex + 1}}</text>
+									<uni-icons type="calendar" size="14" color="#999999"></uni-icons>
+									<text>{{formatDate(spot.visit_date)}}</text>
+								</view>
+								<view v-if="spot.notes" class="spot-notes">
+									<uni-icons type="paperplane" size="14" color="#2B9939"></uni-icons>
+									<text>{{spot.notes}}</text>
 								</view>
 							</view>
 							
 							<view class="spot-actions">
-								<view class="action-btn edit" @click="editSpotNotes(dateIndex, spotIndex)">
-									<uni-icons type="compose" size="16" color="#007AFF"></uni-icons>
+								<view 
+									class="action-btn" 
+									@click.stop="openNotesPopup(dateIndex, spotIndex)"
+								>
+									<uni-icons type="compose" size="18" color="#007AFF"></uni-icons>
 								</view>
-								<view class="action-btn delete" @click="removeSpot(dateIndex, spotIndex)">
-									<uni-icons type="trash" size="16" color="#FF3B30"></uni-icons>
+								<view 
+									class="action-btn" 
+									@click.stop="removeSpot(dateIndex, spotIndex)"
+								>
+									<uni-icons type="trash" size="18" color="#FF3B30"></uni-icons>
 								</view>
 							</view>
 						</view>
@@ -106,7 +117,7 @@
 				</view>
 				
 				<view v-else class="empty-spots">
-					<text>暂无景点，点击"添加景点"按钮添加</text>
+					<text>您尚未添加任何景点，点击上方按钮添加吧!</text>
 				</view>
 			</view>
 		</view>
@@ -116,16 +127,44 @@
 			<button class="btn save" @click="savePlan">保存</button>
 		</view>
 		
-		<!-- 景点备注编辑弹窗 -->
-		<uni-popup ref="notesPopup" type="dialog">
-			<uni-popup-dialog
-				mode="input"
-				title="景点备注"
-				placeholder="请输入景点游览备注"
-				:value="currentSpotNotes"
-				@confirm="confirmSpotNotes"
-				@close="closeNotesPopup"
-			></uni-popup-dialog>
+		<!-- 添加备注弹窗 -->
+		<uni-popup ref="notesPopup" type="bottom">
+			<view class="notes-popup">
+				<view class="notes-popup-header">
+					<text class="title">景点备注</text>
+					<text>记录您对景点的特别计划或想法</text>
+				</view>
+				<view class="notes-popup-content">
+					<view class="form-item">
+						<text class="label">备注内容</text>
+						<textarea 
+							class="notes-textarea" 
+							v-model="currentSpotNotes" 
+							placeholder="请输入您对该景点的备注，例如：必去景点、特色美食、交通建议等" 
+							maxlength="200"
+						></textarea>
+						<text class="notes-count">{{currentSpotNotes.length}}/200</text>
+					</view>
+					
+					<view class="quick-notes">
+						<text class="label">快速备注</text>
+						<view class="quick-notes-list">
+							<view 
+								v-for="(tag, index) in quickNotes" 
+								:key="index"
+								class="quick-note-tag"
+								@click="addQuickNote(tag)"
+							>
+								<text>{{tag}}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<view class="notes-popup-footer">
+					<button class="btn cancel" @click="closeNotesPopup">取消</button>
+					<button class="btn confirm" @click="confirmNotes">确认</button>
+				</view>
+			</view>
 		</uni-popup>
 	</view>
 </template>
@@ -152,7 +191,8 @@
 				statusOptions: ['计划中', '进行中', '已完成'],
 				currentSpotIndex: -1,
 				currentDateIndex: -1,
-				currentSpotNotes: ''
+				currentSpotNotes: '',
+				quickNotes: ['必去景点', '特色美食', '交通便利', '性价比高', '适合拍照', '人少清净', '带孩子必去', '情侣约会', '早上去最佳', '傍晚去最佳']
 			}
 		},
 		onLoad(options) {
@@ -262,21 +302,40 @@
 				try {
 					const app = getApp();
 					const userId = app.globalData.getUserId();
+					console.log("userId",userId);
 					
 					const action = this.isEdit ? 'update' : 'create';
-					const data = {
+					
+					// 处理spots数组，确保是普通对象
+					const spots = this.planData.spots ? this.planData.spots.map(spot => ({
+						spot_id: spot.spot_id,
+						visit_date: spot.visit_date,
+						notes: spot.notes || ''
+					})) : [];
+					
+					const requestData = {
 						action,
-						plan: { ...this.planData },
+						plan: {
+							title: this.planData.title || '',
+							description: this.planData.description || '',
+							start_date: this.planData.start_date,
+							end_date: this.planData.end_date,
+							spots: spots,
+							is_public: this.planData.is_public || false,
+							status: this.planData.status || 0
+						},
 						user_id: userId
 					};
 					
 					if (this.isEdit) {
-						data.plan_id = this.planId;
+						requestData.plan_id = this.planId;
 					}
+					
+					console.log("发送到云函数的数据：", JSON.parse(JSON.stringify(requestData)));
 					
 					const res = await uniCloud.callFunction({
 						name: 'manage-plans',
-						data: data
+						data: JSON.parse(JSON.stringify(requestData))
 					});
 					
 					if (res.result.code === 0) {
@@ -450,31 +509,51 @@
 			},
 			
 			/**
-			 * 编辑景点备注
+			 * 打开备注弹窗
+			 * @param {Number} dateIndex 日期组索引
+			 * @param {Number} spotIndex 景点索引
 			 */
-			editSpotNotes(dateIndex, spotIndex) {
+			openNotesPopup(dateIndex, spotIndex) {
 				this.currentDateIndex = dateIndex;
 				this.currentSpotIndex = spotIndex;
+				
 				const spot = this.groupedSpots[dateIndex].spots[spotIndex];
 				this.currentSpotNotes = spot.notes || '';
+				
 				this.$refs.notesPopup.open();
 			},
 			
 			/**
-			 * 确认景点备注
+			 * 添加快速备注标签
+			 * @param {String} tag 标签文本
 			 */
-			confirmSpotNotes(value) {
+			addQuickNote(tag) {
+				if (!this.currentSpotNotes) {
+					this.currentSpotNotes = tag;
+				} else if (!this.currentSpotNotes.includes(tag)) {
+					this.currentSpotNotes += '，' + tag;
+				}
+			},
+			
+			/**
+			 * 确认修改备注
+			 */
+			confirmNotes() {
 				if (this.currentDateIndex >= 0 && this.currentSpotIndex >= 0) {
 					const spot = this.groupedSpots[this.currentDateIndex].spots[this.currentSpotIndex];
-					const spotIndex = this.planData.spots.findIndex(s => 
+					
+					// 找到planData.spots中对应的景点
+					const index = this.planData.spots.findIndex(s => 
 						s.spot_id === spot.spot_id && 
 						s.visit_date === spot.visit_date
 					);
 					
-					if (spotIndex >= 0) {
-						this.planData.spots[spotIndex].notes = value;
+					if (index >= 0) {
+						this.planData.spots[index].notes = this.currentSpotNotes;
 					}
 				}
+				console.log("景点备注：", this.currentSpotNotes);
+				console.log("this.planData", this.planData);
 				this.closeNotesPopup();
 			},
 			
@@ -665,6 +744,24 @@
 							align-items: center;
 							font-size: 24rpx;
 							color: #666666;
+							margin-bottom: 8rpx;
+							
+							text {
+								margin-left: 4rpx;
+							}
+						}
+						
+						.spot-notes {
+							display: flex;
+							align-items: flex-start;
+							font-size: 24rpx;
+							color: #2B9939;
+							word-break: break-all;
+							
+							text {
+								margin-left: 4rpx;
+								flex: 1;
+							}
 						}
 					}
 					
@@ -712,6 +809,113 @@
 			&.save {
 				background-color: #007AFF;
 				color: #ffffff;
+			}
+		}
+	}
+	
+	.notes-popup {
+		background-color: #FFFFFF;
+		border-radius: 20rpx 20rpx 0 0;
+		padding: 30rpx;
+		
+		.notes-popup-header {
+			margin-bottom: 30rpx;
+			
+			.title {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333333;
+				margin-bottom: 10rpx;
+				display: block;
+			}
+			
+			text {
+				font-size: 24rpx;
+				color: #999999;
+			}
+		}
+		
+		.notes-popup-content {
+			.form-item {
+				margin-bottom: 30rpx;
+				position: relative;
+				
+				.label {
+					display: block;
+					font-size: 28rpx;
+					color: #333333;
+					margin-bottom: 10rpx;
+				}
+				
+				.notes-textarea {
+					width: 100%;
+					height: 200rpx;
+					background-color: #f5f5f5;
+					border-radius: 10rpx;
+					padding: 20rpx;
+					font-size: 28rpx;
+					color: #333333;
+				}
+				
+				.notes-count {
+					position: absolute;
+					right: 10rpx;
+					bottom: 10rpx;
+					font-size: 24rpx;
+					color: #999999;
+				}
+			}
+			
+			.quick-notes {
+				margin-bottom: 30rpx;
+				
+				.label {
+					display: block;
+					font-size: 28rpx;
+					color: #333333;
+					margin-bottom: 10rpx;
+				}
+				
+				.quick-notes-list {
+					display: flex;
+					flex-wrap: wrap;
+					
+					.quick-note-tag {
+						background-color: #f0f7f1;
+						border-radius: 6rpx;
+						padding: 10rpx 20rpx;
+						margin-right: 20rpx;
+						margin-bottom: 20rpx;
+						
+						text {
+							font-size: 24rpx;
+							color: #2B9939;
+						}
+					}
+				}
+			}
+		}
+		
+		.notes-popup-footer {
+			display: flex;
+			
+			.btn {
+				flex: 1;
+				height: 80rpx;
+				line-height: 80rpx;
+				border-radius: 40rpx;
+				font-size: 30rpx;
+				
+				&.cancel {
+					margin-right: 20rpx;
+					background-color: #f5f5f5;
+					color: #666666;
+				}
+				
+				&.confirm {
+					background-color: #2B9939;
+					color: #ffffff;
+				}
 			}
 		}
 	}

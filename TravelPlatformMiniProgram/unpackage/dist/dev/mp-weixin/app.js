@@ -81,6 +81,8 @@ const _sfc_main = {
     }
   }
 };
+require("./vue-devtools/hook.js");
+require("./vue-devtools/backend.js");
 function createApp() {
   const app = common_vendor.createSSRApp(_sfc_main);
   return {

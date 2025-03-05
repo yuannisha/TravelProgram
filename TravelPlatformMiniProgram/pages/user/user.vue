@@ -10,7 +10,6 @@
 				<image class="avatar" :src="userInfo.avatar" mode="aspectFill" @click="goToAvatar"></image>
 				<view class="info-right">
 					<text class="username">{{userInfo.username}}</text>
-					<text class="user-id">ID: {{userInfo.id}}</text>
 				</view>
 			</view>
 		</view>

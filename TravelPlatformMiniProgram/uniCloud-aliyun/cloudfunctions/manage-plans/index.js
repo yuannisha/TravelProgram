@@ -10,11 +10,16 @@
  * @param {number} event.pageSize 每页数量（获取列表时使用）
  * @param {string} event.status 计划状态筛选（获取列表时使用）
  * @param {string} event.user_id 用户ID（从前端传入）
+ * @returns {Object} 返回结果
+ * @returns {number} result.code 状态码：0-成功，401-未登录，400-参数错误，403-无权限，404-不存在
+ * @returns {string} result.message 提示信息
+ * @returns {Object} [result.data] 返回数据
  */
 exports.main = async (event, context) => {
 	const db = uniCloud.database();
 	const dbCmd = db.command;
 	const plansCollection = db.collection('travel-plans');
+	console.log(event)
 	
 	// 获取当前用户ID 
 	const USERID = event.user_id;

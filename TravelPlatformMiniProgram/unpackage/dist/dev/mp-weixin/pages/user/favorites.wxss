@@ -689,3 +689,27 @@ input {
   color: #52c41a;
   background-color: rgba(82, 196, 26, 0.1);
 }
+.deleted-item {
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.deleted-item .deleted-text {
+  color: #999;
+  font-size: 28rpx;
+  margin-left: 10rpx;
+  flex: 1;
+}
+.deleted-item .remove-btn {
+  background-color: #ff5a5f;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+  margin: 0;
+  line-height: 1.5;
+}

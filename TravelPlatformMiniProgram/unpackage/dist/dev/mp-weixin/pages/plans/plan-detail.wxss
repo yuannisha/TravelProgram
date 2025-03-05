@@ -496,67 +496,77 @@ input {
   color: #333333;
   margin-bottom: 30rpx;
 }
-.spots-section .spots-list .spot-item {
-  position: relative;
-  margin-bottom: 40rpx;
-  padding-bottom: 30rpx;
+.spots-section .spots-list .date-group {
+  margin-bottom: 30rpx;
+}
+.spots-section .spots-list .date-group .date-header {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+  margin-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.spots-section .spots-list .date-group .date-header .day-number {
+  padding: 6rpx 16rpx;
+  background-color: rgba(0, 122, 255, 0.8);
+  color: #ffffff;
+  font-size: 24rpx;
+  border-radius: 6rpx;
+  margin-right: 16rpx;
+}
+.spots-section .spots-list .date-group .date-header .date-text {
+  font-size: 26rpx;
+  color: #666666;
+}
+.spots-section .spots-list .date-group .spot-item {
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
   border-bottom: 1rpx dashed #f0f0f0;
 }
-.spots-section .spots-list .spot-item:last-child {
+.spots-section .spots-list .date-group .spot-item:last-child {
   margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
 }
-.spots-section .spots-list .spot-item .spot-day {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 6rpx 20rpx;
-  background-color: rgba(0, 122, 255, 0.8);
-  color: #ffffff;
-  font-size: 24rpx;
-  border-radius: 10rpx 0 10rpx 0;
-  z-index: 1;
-}
-.spots-section .spots-list .spot-item .spot-content {
+.spots-section .spots-list .date-group .spot-item .spot-content {
   display: flex;
   margin-bottom: 20rpx;
 }
-.spots-section .spots-list .spot-item .spot-content .spot-image {
+.spots-section .spots-list .date-group .spot-item .spot-content .spot-image {
   width: 200rpx;
   height: 150rpx;
   border-radius: 10rpx;
   margin-right: 20rpx;
 }
-.spots-section .spots-list .spot-item .spot-content .spot-info {
+.spots-section .spots-list .date-group .spot-item .spot-content .spot-info {
   flex: 1;
 }
-.spots-section .spots-list .spot-item .spot-content .spot-info .spot-name {
+.spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-name {
   font-size: 30rpx;
   font-weight: bold;
   color: #333333;
   margin-bottom: 10rpx;
 }
-.spots-section .spots-list .spot-item .spot-content .spot-info .spot-date, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-address, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-price {
+.spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-date, .spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-address, .spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-price {
   display: flex;
   align-items: center;
   font-size: 24rpx;
   color: #666666;
   margin-bottom: 10rpx;
 }
-.spots-section .spots-list .spot-item .spot-content .spot-info .spot-date text, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-address text, .spots-section .spots-list .spot-item .spot-content .spot-info .spot-price text {
+.spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-date text, .spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-address text, .spots-section .spots-list .date-group .spot-item .spot-content .spot-info .spot-price text {
   margin-left: 6rpx;
 }
-.spots-section .spots-list .spot-item .spot-notes {
+.spots-section .spots-list .date-group .spot-item .spot-notes {
   background-color: #f9f9f9;
   padding: 20rpx;
   border-radius: 10rpx;
   font-size: 26rpx;
 }
-.spots-section .spots-list .spot-item .spot-notes .notes-label {
+.spots-section .spots-list .date-group .spot-item .spot-notes .notes-label {
   color: #999999;
 }
-.spots-section .spots-list .spot-item .spot-notes .notes-content {
+.spots-section .spots-list .date-group .spot-item .spot-notes .notes-content {
   color: #666666;
 }
 .spots-section .empty-spots {

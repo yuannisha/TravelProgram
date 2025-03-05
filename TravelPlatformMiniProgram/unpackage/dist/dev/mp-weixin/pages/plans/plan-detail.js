@@ -14,7 +14,7 @@ const _sfc_main = {
   onLoad(options) {
     const app = getApp();
     app.globalData.checkLoginStatus(true);
-    common_vendor.index.__f__("log", "at pages/plans/plan-detail.vue:145", "options", options);
+    common_vendor.index.__f__("log", "at pages/plans/plan-detail.vue:149", "options", options);
     if (options.id) {
       this.planId = options.id;
       if (options.mode === "view") {
@@ -63,7 +63,7 @@ const _sfc_main = {
           }, 1500);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:200", "获取计划详情失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:204", "获取计划详情失败", e);
         common_vendor.index.showToast({
           title: "获取计划详情失败，请稍后重试",
           icon: "none"
@@ -95,7 +95,7 @@ const _sfc_main = {
           this.isFavorite = res.result.data.isFavorite;
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:235", "检查收藏状态失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:239", "检查收藏状态失败", e);
       }
     },
     /**
@@ -134,7 +134,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:280", "收藏操作失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:284", "收藏操作失败", e);
         common_vendor.index.showToast({
           title: "操作失败，请稍后重试",
           icon: "none"
@@ -191,10 +191,10 @@ const _sfc_main = {
               imageUrl: ((_c = (_b = (_a = this.planData.spots) == null ? void 0 : _a[0]) == null ? void 0 : _b.spot_detail) == null ? void 0 : _c.imageUrl) || "/static/logo.png",
               href: `https://example.com/pages/plans/plan-detail?id=${this.planId}&mode=view`,
               success: function(res2) {
-                common_vendor.index.__f__("log", "at pages/plans/plan-detail.vue:342", "分享成功", res2);
+                common_vendor.index.__f__("log", "at pages/plans/plan-detail.vue:346", "分享成功", res2);
               },
               fail: function(err) {
-                common_vendor.index.__f__("log", "at pages/plans/plan-detail.vue:345", "分享失败", err);
+                common_vendor.index.__f__("log", "at pages/plans/plan-detail.vue:349", "分享失败", err);
                 common_vendor.index.showToast({
                   title: "分享失败",
                   icon: "none"
@@ -250,7 +250,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:406", "设置公开状态失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:410", "设置公开状态失败", e);
         common_vendor.index.showToast({
           title: "设置失败，请稍后重试",
           icon: "none"
@@ -311,7 +311,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:477", "删除计划失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/plan-detail.vue:481", "删除计划失败", e);
         common_vendor.index.showToast({
           title: "删除失败，请稍后重试",
           icon: "none"
@@ -369,6 +369,48 @@ const _sfc_main = {
       if (price === void 0 || price === null)
         return "";
       return "¥" + (price / 100).toFixed(2);
+    },
+    /**
+     * 获取景点的游览天数
+     * @param {Object} spot 景点对象
+     * @return {Number} 游览天数（从计划开始日期算起的第几天）
+     */
+    getVisitDay(spot) {
+      if (!spot || !spot.visit_date || !this.planData.start_date)
+        return 1;
+      const visitDateStr = this.formatDate(spot.visit_date);
+      const startDateStr = this.formatDate(this.planData.start_date);
+      if (visitDateStr === startDateStr)
+        return 1;
+      const visitDate = new Date(visitDateStr);
+      const startDate = new Date(startDateStr);
+      const diffTime = visitDate.getTime() - startDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1e3 * 60 * 60 * 24));
+      return diffDays + 1;
+    }
+  },
+  computed: {
+    /**
+     * 按日期分组后的景点列表
+     */
+    groupedSpots() {
+      if (!this.planData.spots || !this.planData.spots.length) {
+        return [];
+      }
+      const groupsByDate = {};
+      this.planData.spots.forEach((spot) => {
+        const dateKey = this.formatDate(spot.visit_date);
+        if (!groupsByDate[dateKey]) {
+          const dayNumber = this.getVisitDay(spot);
+          groupsByDate[dateKey] = {
+            date: spot.visit_date,
+            dayNumber,
+            spots: []
+          };
+        }
+        groupsByDate[dateKey].spots.push(spot);
+      });
+      return Object.values(groupsByDate).sort((a, b) => a.date - b.date);
     }
   },
   // 监听页面返回
@@ -453,57 +495,56 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   } : {}, {
     B: $data.planData.spots && $data.planData.spots.length > 0
   }, $data.planData.spots && $data.planData.spots.length > 0 ? {
-    C: common_vendor.f($data.planData.spots, (spot, index, i0) => {
-      return common_vendor.e({
-        a: common_vendor.t(index + 1),
-        b: spot.spot_detail && spot.spot_detail.imageUrl
-      }, spot.spot_detail && spot.spot_detail.imageUrl ? {
-        c: spot.spot_detail.imageUrl
-      } : {
-        d: common_assets._imports_0$5
-      }, {
-        e: common_vendor.t(spot.spot_detail ? spot.spot_detail.name : "未知景点"),
-        f: "7944445f-7-" + i0,
-        g: common_vendor.t($options.formatDate(spot.visit_date)),
-        h: spot.spot_detail && spot.spot_detail.address
-      }, spot.spot_detail && spot.spot_detail.address ? {
-        i: "7944445f-8-" + i0,
-        j: common_vendor.p({
-          type: "location",
-          size: "14",
-          color: "#666"
+    C: common_vendor.f($options.groupedSpots, (dateGroup, dateIndex, i0) => {
+      return {
+        a: common_vendor.t(dateGroup.dayNumber),
+        b: common_vendor.t($options.formatDate(dateGroup.date)),
+        c: common_vendor.f(dateGroup.spots, (spot, spotIndex, i1) => {
+          return common_vendor.e({
+            a: spot.spot_detail && spot.spot_detail.imageUrl
+          }, spot.spot_detail && spot.spot_detail.imageUrl ? {
+            b: spot.spot_detail.imageUrl
+          } : {
+            c: common_assets._imports_0$5
+          }, {
+            d: common_vendor.t(spot.spot_detail ? spot.spot_detail.name : "未知景点"),
+            e: spot.spot_detail && spot.spot_detail.address
+          }, spot.spot_detail && spot.spot_detail.address ? {
+            f: "7944445f-7-" + i0 + "-" + i1,
+            g: common_vendor.p({
+              type: "location",
+              size: "14",
+              color: "#666"
+            }),
+            h: common_vendor.t(spot.spot_detail.address)
+          } : {}, {
+            i: spot.spot_detail && spot.spot_detail.price !== void 0
+          }, spot.spot_detail && spot.spot_detail.price !== void 0 ? {
+            j: "7944445f-8-" + i0 + "-" + i1,
+            k: common_vendor.p({
+              type: "rmb",
+              size: "14",
+              color: "#666"
+            }),
+            l: common_vendor.t($options.formatPrice(spot.spot_detail.price))
+          } : {}, {
+            m: spot.notes
+          }, spot.notes ? {
+            n: common_vendor.t(spot.notes)
+          } : {}, {
+            o: spotIndex,
+            p: common_vendor.o(($event) => $options.navigateToSpotDetail(spot.spot_id), spotIndex)
+          });
         }),
-        k: common_vendor.t(spot.spot_detail.address)
-      } : {}, {
-        l: spot.spot_detail && spot.spot_detail.price !== void 0
-      }, spot.spot_detail && spot.spot_detail.price !== void 0 ? {
-        m: "7944445f-9-" + i0,
-        n: common_vendor.p({
-          type: "rmb",
-          size: "14",
-          color: "#666"
-        }),
-        o: common_vendor.t($options.formatPrice(spot.spot_detail.price))
-      } : {}, {
-        p: spot.notes
-      }, spot.notes ? {
-        q: common_vendor.t(spot.notes)
-      } : {}, {
-        r: index,
-        s: common_vendor.o(($event) => $options.navigateToSpotDetail(spot.spot_id), index)
-      });
-    }),
-    D: common_vendor.p({
-      type: "calendar",
-      size: "14",
-      color: "#666"
+        d: dateIndex
+      };
     })
   } : common_vendor.e({
-    E: common_assets._imports_0$4,
-    F: common_vendor.t($data.viewMode ? "该用户计划中并无景点" : "暂无景点，请在编辑页面添加景点"),
-    G: !$data.viewMode
+    D: common_assets._imports_0$4,
+    E: common_vendor.t($data.viewMode ? "该用户计划中并无景点" : "暂无景点，请在编辑页面添加景点"),
+    F: !$data.viewMode
   }, !$data.viewMode ? {
-    H: common_vendor.o((...args) => $options.navigateToEdit && $options.navigateToEdit(...args))
+    G: common_vendor.o((...args) => $options.navigateToEdit && $options.navigateToEdit(...args))
   } : {})));
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

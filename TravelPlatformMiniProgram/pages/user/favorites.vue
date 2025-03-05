@@ -38,7 +38,14 @@
 			<!-- 景点列表 -->
 			<template v-if="activeTab === 'spot'">
 				<view class="spot-favorite-item" v-for="(item, index) in favoriteList" :key="index">
-					<view class="content" @click="goToDetail(item)">
+					<!-- 已删除的景点显示 -->
+					<view class="deleted-item" v-if="item.is_deleted">
+						<uni-icons type="info" size="20" color="#999"></uni-icons>
+						<text class="deleted-text">该景点已不存在</text>
+						<button class="remove-btn" @click="cancelFavorite(item, index)">移除</button>
+					</view>
+					<!-- 正常景点显示 -->
+					<view class="content" v-else @click="goToDetail(item)">
 						<image class="spot-image" :src="item.detail.imageUrl" mode="aspectFill"></image>
 						<view class="info">
 							<view class="name-box">
@@ -83,7 +90,14 @@
 			<!-- 旅行计划列表 -->
 			<template v-else>
 				<view class="plan-favorite-item" v-for="(item, index) in favoriteList" :key="index">
-					<view class="content" @click="goToDetail(item)">
+					<!-- 已删除的计划显示 -->
+					<view class="deleted-item" v-if="item.is_deleted">
+						<uni-icons type="info" size="20" color="#999"></uni-icons>
+						<text class="deleted-text">该旅行计划已不存在</text>
+						<button class="remove-btn" @click="cancelFavorite(item, index)">移除</button>
+					</view>
+					<!-- 正常计划显示 -->
+					<view class="content" v-else @click="goToDetail(item)">
 						<!-- 用户信息 -->
 						<view class="user-info">
 							<image 
@@ -194,14 +208,22 @@ export default {
 				})
 				
 				if (res.result.code === 0) {
-					const { list, total } = res.result.data
+					const { list, total, deleted_count } = res.result.data
+					
+					// 如果有被删除的项目,显示提示
+					if (deleted_count > 0) {
+						uni.showToast({
+							title: `${deleted_count}个${this.activeTab === 'spot' ? '景点' : '旅行计划'}已被删除`,
+							icon: 'none',
+							duration: 2000
+						})
+					}
 					
 					if (this.page === 1) {
 						this.favoriteList = list
 						console.log("this.favoriteList",this.favoriteList)
 					} else {
 						this.favoriteList = [...this.favoriteList, ...list]
-						console.log("this.favoriteList",this.favoriteList)
 					}
 					
 					this.noMore = this.favoriteList.length >= total
@@ -219,9 +241,13 @@ export default {
 		
 		// 取消收藏
 		async cancelFavorite(item, index) {
+			const message = item.is_deleted 
+				? `确定要移除该${this.activeTab === 'spot' ? '景点' : '旅行计划'}吗？`
+				: `确定要取消收藏该${this.activeTab === 'spot' ? '景点' : '旅行计划'}吗？`
+				
 			uni.showModal({
 				title: '提示',
-				content: `确定要取消收藏该${this.activeTab === 'spot' ? '景点' : '旅行计划'}吗？`,
+				content: message,
 				success: async res => {
 					if (res.confirm) {
 						try {
@@ -231,8 +257,8 @@ export default {
 								data: {
 									type: this.activeTab,
 									...(this.activeTab === 'spot' 
-										? { spotId: item.detail._id }
-										: { planId: item.detail._id }
+										? { spotId: item.spot_id }
+										: { planId: item.plan_id }
 									),
 									uid: uid.id
 								}
@@ -241,12 +267,12 @@ export default {
 							if (res.result.code === 0) {
 								this.favoriteList.splice(index, 1)
 								uni.showToast({
-									title: '已取消收藏',
+									title: item.is_deleted ? '已移除' : '已取消收藏',
 									icon: 'none'
 								})
 							}
 						} catch (e) {
-							console.error('取消收藏失败:', e)
+							console.error('操作失败:', e)
 							uni.showToast({
 								title: '操作失败',
 								icon: 'none'
@@ -283,8 +309,8 @@ export default {
 						// TODO: 调用微信分享
 					} else {
 						const path = this.activeTab === 'spot' 
-							? `/pages/spots/detail?id=${item.detail._id}`
-							: `/pages/plans/plan-detail?id=${item.detail._id}`
+							? `/pages/spots/detail?id=${item.spot_id}`
+							: `/pages/plans/plan-detail?id=${item.plan_id}`
 						uni.setClipboardData({
 							data: `https://example.com${path}`,
 							success: () => {
@@ -301,12 +327,13 @@ export default {
 		
 		// 跳转到详情页
 		goToDetail(item) {
-			const path = this.activeTab === 'spot' 
-				? `/pages/spots/detail?id=${item.detail._id}`
-				: `/pages/plans/plan-detail?id=${item.detail._id}`
-			uni.navigateTo({
-				url: path
-			})
+			if (item.is_deleted) return
+			
+			const url = this.activeTab === 'spot' 
+				? `/pages/spots/detail?id=${item.spot_id}`
+				: `/pages/plans/plan-detail?id=${item.plan_id}`
+			
+			uni.navigateTo({ url })
 		},
 		
 		// 跳转到列表页
@@ -732,6 +759,33 @@ export default {
 	&.status-completed {
 		color: #52c41a;
 		background-color: rgba(82, 196, 26, 0.1);
+	}
+}
+
+.deleted-item {
+	padding: 20rpx;
+	background-color: #f8f8f8;
+	border-radius: 12rpx;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20rpx;
+	
+	.deleted-text {
+		color: #999;
+		font-size: 28rpx;
+		margin-left: 10rpx;
+		flex: 1;
+	}
+	
+	.remove-btn {
+		background-color: #ff5a5f;
+		color: #fff;
+		font-size: 24rpx;
+		padding: 8rpx 20rpx;
+		border-radius: 24rpx;
+		margin: 0;
+		line-height: 1.5;
 	}
 }
 

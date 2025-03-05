@@ -139,6 +139,7 @@
 			// 页面加载时检查登录状态
 			const app = getApp();
 			app.globalData.checkLoginStatus(true); // 修改为强制跳转
+			this.userInfo = uni.getStorageSync('userInfo');
 			
 			this.getPublicPlans();
 		},
@@ -146,6 +147,7 @@
 			// 页面加载时检查登录状态
 			const app = getApp();
 			app.globalData.checkLoginStatus(true); // 修改为强制跳转
+			this.userInfo = uni.getStorageSync('userInfo');
 			
 			this.getPublicPlans();
 		},
@@ -179,7 +181,7 @@
 						} else {
 							this.list = [...this.list, ...list];
 						}
-						
+						console.log("this.list",this.list);
 						this.total = total;
 						
 						if (this.list.length >= total) {

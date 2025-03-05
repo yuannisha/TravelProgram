@@ -29,11 +29,13 @@ const _sfc_main = {
   onShow() {
     const app = getApp();
     app.globalData.checkLoginStatus(true);
+    this.userInfo = common_vendor.index.getStorageSync("userInfo");
     this.getPublicPlans();
   },
   onLoad() {
     const app = getApp();
     app.globalData.checkLoginStatus(true);
+    this.userInfo = common_vendor.index.getStorageSync("userInfo");
     this.getPublicPlans();
   },
   methods: {
@@ -63,6 +65,7 @@ const _sfc_main = {
           } else {
             this.list = [...this.list, ...list];
           }
+          common_vendor.index.__f__("log", "at pages/plans/public-plans.vue:184", "this.list", this.list);
           this.total = total;
           if (this.list.length >= total) {
             this.loadMoreStatus = "noMore";
@@ -76,7 +79,7 @@ const _sfc_main = {
           });
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at pages/plans/public-plans.vue:197", "获取公开旅行计划失败", e);
+        common_vendor.index.__f__("error", "at pages/plans/public-plans.vue:199", "获取公开旅行计划失败", e);
         common_vendor.index.showToast({
           title: "获取失败，请稍后重试",
           icon: "none"

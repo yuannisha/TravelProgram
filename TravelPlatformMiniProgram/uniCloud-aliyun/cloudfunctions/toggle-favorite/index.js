@@ -3,6 +3,19 @@
 const db = uniCloud.database()
 const favoriteCollection = db.collection('travel-favorites')
 
+/**
+ * 切换收藏状态
+ * @param {Object} event 请求参数
+ * @param {string} event.uid 用户ID
+ * @param {string} [event.spotId] 景点ID（type为spot时必填）
+ * @param {string} [event.planId] 行程ID（type为plan时必填）
+ * @param {string} event.type 收藏类型：spot-景点，plan-行程
+ * @returns {Object} 返回结果
+ * @returns {number} result.code 状态码：0-成功，-1-参数错误，-2-未登录
+ * @returns {string} result.message 提示信息
+ * @returns {Object} result.data 返回数据
+ * @returns {boolean} result.data.isFavorite 是否已收藏
+ */
 exports.main = async (event, context) => {
 	const {
 		spotId, // 景点ID
