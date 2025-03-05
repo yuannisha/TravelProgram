@@ -48,15 +48,22 @@ exports.main = async (event, context) => {
 			newStatus = 2; // 已完成
 		}
 		
-		// 如果状态发生变化，更新数据库
-		if (newStatus !== plan.status) {
-			await plansCollection.doc(plan._id).update({
-				status: newStatus,
-				update_date: now
-			});
-			plan.status = newStatus;
-			plan.update_date = now;
+		// 如果状态发生变化，且存在_id，才更新数据库
+		if (newStatus !== plan.status && plan._id) {
+			try {
+				await plansCollection.doc(plan._id).update({
+					status: newStatus,
+					update_date: now
+				});
+				console.log('状态已更新', plan._id, newStatus);
+			} catch (e) {
+				console.error('更新状态失败', e);
+				// 即使更新失败，继续处理
+			}
 		}
+		
+		plan.status = newStatus;
+		plan.update_date = now;
 		
 		return plan;
 	}
@@ -69,9 +76,16 @@ exports.main = async (event, context) => {
 			plan.user_id = USERID;
 			plan.create_date = Date.now();
 			plan.update_date = plan.create_date;
-			// 根据当前时间判断状态
-			const updatedPlan = await updatePlanStatus(plan);
-			plan.status = updatedPlan.status;
+			
+			// 直接计算状态，不尝试更新数据库
+			const now = Date.now();
+			if (now < plan.start_date) {
+				plan.status = 0; // 计划中
+			} else if (now >= plan.start_date && now <= plan.end_date) {
+				plan.status = 1; // 进行中
+			} else if (now > plan.end_date) {
+				plan.status = 2; // 已完成
+			}
 			
 			const createResult = await plansCollection.add(plan);
 			
@@ -99,6 +113,8 @@ exports.main = async (event, context) => {
 				});
 				plan.status = updatedPlan.status;
 			}
+			// 删除plan中的_id字段
+			delete plan._id;
 			
 			await plansCollection.doc(planId).update(plan);
 			
